@@ -4,13 +4,13 @@
 
 一本可以漫游的古诗文小集。沿着风、花、雪、月与不同心绪寻篇，把喜欢的句子做成卡片。
 
-本项目复用仓库 **[climbrey/climbrey.github.io](https://github.com/climbrey/climbrey.github.io)**，网站地址为 **https://climbrey.github.io/**。本次迁移尚待推送及公网验证；上线前该地址仍是旧测试页。
+本项目已发布到 **https://climbrey.github.io/**，iPhone、安卓和电脑均可直接访问。源码及后续更新统一使用仓库 **[climbrey/climbrey.github.io](https://github.com/climbrey/climbrey.github.io)**。
 
 电脑离线预览：双击项目根目录的 **[offline.html](offline.html)**，用现代浏览器打开即可。这个文件约 118 KB，内置作品、样式、插画与交互，无需联网或安装依赖。`index.html` 是用于网站发布的首页。
 
 效果截图：[电脑首页](preview/首页-电脑.png) · [手机首页](preview/首页-手机.png) · [素笺分享卡](preview/分享卡-素笺.png) · [草木分享卡](preview/分享卡-草木.png) · [月夜阅读留念](preview/分享卡-月夜留念.png)。
 
-**iPhone / 安卓直接访问**：上线后用手机浏览器打开同一个网站地址，也可添加到主屏幕。仓库采用 `main / 根目录` 发布，参见 [手机访问与后续发布](docs/手机访问与GitHub发布.md)。
+**iPhone / 安卓直接访问**：用手机浏览器打开同一个网站地址，也可添加到主屏幕。仓库采用 `main / 根目录` 发布，参见 [手机访问与后续发布](docs/手机访问与GitHub发布.md)。
 
 ## 可以体验什么
 

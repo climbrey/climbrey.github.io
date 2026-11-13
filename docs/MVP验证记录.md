@@ -34,7 +34,14 @@
 
 手机网页版补充验证：仓库根目录及子目录两种路径下的 manifest、图标及 Service Worker 正常；断网重开可阅读并导出图片；从网页导出的 HTML 仍为独立文件；更新需用户主动点击且保留收藏及无关缓存；主屏幕启动地址断网可访问。根目录的离线缓存不会劫持旧站归档或独立 HTML 路径。
 
-已接入目标仓库 `climbrey/climbrey.github.io`，保留远端历史并原样归档旧站三个文件。构建同时更新仓库根目录网站和 `site/`；已检查两者一致。迁移后的独立 HTML 重新通过上述 11 组核心流程及 390px / 320px 布局检查。公网发布尚待 GitHub 身份认证与推送，未将本机验证表述为实际上线成功。
+已接入目标仓库 `climbrey/climbrey.github.io`，保留远端历史并原样归档旧站三个文件。构建同时更新仓库根目录网站和 `site/`；已检查两者一致。迁移后的独立 HTML 重新通过上述 11 组核心流程及 390px / 320px 布局检查。
+
+2026-11-13 公网发布验证通过：
+
+- 网站：https://climbrey.github.io/；发布提交：`1875f16`。
+- [GitHub 内容与构建校验](https://github.com/climbrey/climbrey.github.io/actions/runs/43381257733)及 [Pages 部署](https://github.com/climbrey/climbrey.github.io/actions/runs/43381255447)均成功。
+- 线上首页、manifest、Service Worker 和旧站归档均返回 HTTP 200，响应内容与本地文件逐字节一致。
+- 独立 Chrome 访问真实 HTTPS 地址，390px / 320px 布局无横向溢出；收藏刷新后保留；断网重开、完整阅读、实际 PNG 下载和主屏幕启动地址通过，未出现脚本异常。
 
 - 这是内容与交互 MVP，17 篇样例不代表全量教材篇目或拓展作品已完成。
 - 当前内容为通行文本和自行编写的注释赏读。保留作品、文集出处与异文说明，后续仍需扩展逐版、逐页的校核依据。

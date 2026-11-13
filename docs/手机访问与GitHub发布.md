@@ -5,13 +5,13 @@
 - 源码仓库：https://github.com/climbrey/climbrey.github.io
 - 手机和电脑共用网站：https://climbrey.github.io/
 - 发布方式：GitHub Pages → Deploy from a branch → `main` → `/(root)`。
-- 旧测试页归档：https://climbrey.github.io/legacy/previous-site/（迁移发布后可访问）。
+- 旧测试页归档：https://climbrey.github.io/legacy/previous-site/。
 
-当前状态：本地已接续旧仓库历史并整理发布文件，尚待推送和公网部署验证。网站地址此前已存在，不能据此判断“山月”已上线。
+当前状态：2026-11-13 已发布并完成公网验证。GitHub 内容校验和 Pages 部署均成功，线上首页、主屏幕配置、离线脚本及旧站归档与本地文件一致。
 
 ## 在手机上使用
 
-上线后，iPhone 和普通安卓手机都通过上述 HTTPS 地址直接打开，无需分别安装 APK 或 IPA。
+iPhone 和普通安卓手机都通过上述 HTTPS 地址直接打开，无需分别安装 APK 或 IPA。
 
 1. **直接预览**：在手机浏览器中打开网站。iPhone 建议使用 Safari，安卓可使用 Chrome、Edge 或支持完整网页交互的系统浏览器。微信中打开受限时选择“在浏览器中打开”。
 2. **留在主屏幕**：iPhone 在 Safari 中选择“分享 → 添加到主屏幕”；若有“作为网页 App 打开”选项则开启。安卓可用浏览器菜单中的“安装应用”或“添加到主屏幕”。网页页脚也提供说明入口。
@@ -31,13 +31,13 @@
 
 ## 后续更新
 
-只编辑 `src/` 中的内容、样式与交互源码，然后运行：
+只编辑 `src/` 中的内容、样式与交互源码，再构建并提交。下面的命令适用于已配置 GitHub 可验证签名密钥、且具有主分支发布权限的本机：
 
 ```sh
 npm run build
 npm test
 git add src scripts tests package.json index.html offline.html manifest.webmanifest pwa.js sw.js icons .nojekyll
-git commit -m "Update Shanyue"
+git commit -S -m "Update Shanyue"
 git push origin main
 ```
 
@@ -54,6 +54,8 @@ site/                      纯静态部署目录（不提交）
 ```
 
 根目录生成文件必须与源码一起提交；自动校验会检查它们是否过期。公开仓库不包含本机的收藏、个人读后感和浏览记录。
+
+仓库现有规则包含主分支更新限制、线性历史和签名提交要求。首次迁移提交 `1875f16` 的推送由 GitHub 按当前账号已有的豁免权限接受；后续更新应遵循仓库规则，使用已验证签名和具有发布权限的账号。通过 GitHub 创建的签名提交也需要将对应源码与生成文件一并更新。
 
 在电脑离线预览时，双击 `offline.html` 即可。网页内的“导出阅读 HTML”也会生成独立文件。手机的文件预览器不一定执行 HTML，因此手机预览推荐网站地址。
 
