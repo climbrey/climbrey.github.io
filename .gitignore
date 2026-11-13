@@ -1,0 +1,9 @@
+.tools/
+test-results/
+__pycache__/
+node_modules/
+site/
+dist/
+preview/*.zip
+# Early, unverified reference notes; retained locally, not part of the published corpus.
+base/

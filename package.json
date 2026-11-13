@@ -1,0 +1,7 @@
+{
+  "name": "shanyue-reading",
+  "version": "0.1.0",
+  "private": true,
+  "description": "山月 · 可离线使用的古诗文阅读与分享卡",
+  "scripts": { "build": "node scripts/build.js", "build:pages": "node scripts/build.js", "build:single": "node scripts/build-single.js", "test": "node tests/content.test.js" }
+}

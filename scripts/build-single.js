@@ -1,0 +1,11 @@
+const fs = require('fs');
+const path = require('path');
+const root = path.resolve(__dirname, '..');
+const read = file => fs.readFileSync(path.join(root, file), 'utf8').replace(/\r\n/g, '\n');
+const data = JSON.parse(read('src/content.json'));
+let html = read('src/shell.html');
+html = html.replace('/* INLINE_STYLES */', () => read('src/style.css'));
+html = html.replace('"INLINE_LIBRARY"', () => JSON.stringify(data).replace(/</g, '\\u003c'));
+html = html.replace('/* INLINE_APP */', () => read('src/app.js'));
+fs.writeFileSync(path.join(root, 'offline.html'), html);
+console.log('Built offline.html · ' + data.works.length + ' works · ' + Math.round(Buffer.byteLength(html) / 1024) + ' KB');

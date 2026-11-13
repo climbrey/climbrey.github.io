@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "山月 · 古诗文阅读",
+  "short_name": "山月",
+  "description": "在字里行间，遇见天地。读诗、寻篇，把喜欢的文字留在身边。",
+  "lang": "zh-CN",
+  "start_url": "./index.html?source=homescreen",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f3ec",
+  "theme_color": "#f5f3ec",
+  "icons": [
+    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
