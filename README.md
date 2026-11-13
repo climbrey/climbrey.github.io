@@ -40,6 +40,7 @@ python -m http.server 8767 --bind 127.0.0.1 --directory site
 python -m pip install --target .tools/test_deps playwright==1.58.0
 python tests/preview_smoke.py
 python tests/edge_cases.py
+python tests/interaction_smoke.py
 python tests/pwa_smoke.py
 python tests/pwa_smoke.py --root
 ```
