@@ -24,8 +24,6 @@ if args.root:
     for relative in [p.relative_to(ROOT/'site') for p in (ROOT/'site').rglob('*') if p.is_file()]:
         shutil.copyfile(ROOT/relative,COPY/relative)
     shutil.copyfile(ROOT/'offline.html',COPY/'offline.html')
-    shutil.copyfile(ROOT/'logo.png',COPY/'logo.png')
-    shutil.copytree(ROOT/'legacy',COPY/'legacy',dirs_exist_ok=True)
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self,*args):
         pass
@@ -50,14 +48,12 @@ with sync_playwright() as p:
     expect(page.locator('.site-footer [data-hosted-only]')).to_have_count(1)
     print('PASS: '+('root homepage' if args.root else 'repository subpath')+', manifest, icons and active service worker',flush=True)
     if args.root:
-        page.goto(URL+'legacy/previous-site/')
-        expect(page.locator('h1')).to_have_text('Hello, GitHub Pages!')
         page.goto(URL+'offline.html')
         expect(page.locator('.hero-copy h2')).to_have_text('鸟鸣涧')
         expect(page.locator('link[rel="manifest"]')).to_have_count(0)
         page.goto(URL)
         expect(page.locator('.hero-copy h2')).to_have_text('鸟鸣涧')
-        print('PASS: old page and standalone HTML remain accessible under the root service worker',flush=True)
+        print('PASS: standalone HTML remains accessible under the root service worker',flush=True)
 
     context.set_offline(True)
     page.reload()

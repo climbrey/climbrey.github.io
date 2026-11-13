@@ -25,7 +25,7 @@ const release = crypto.createHash('sha256').update(html).update(readMobile('pwa.
 ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png'].forEach(file => release.update(fs.readFileSync(path.join(source,'icons',file))));
 fs.writeFileSync(path.join(target, 'sw.js'), readMobile('sw.js').replace('__RELEASE__', release.digest('hex').slice(0, 16)));
 fs.writeFileSync(path.join(target, '.nojekyll'), '');
-// Keep the existing GitHub Pages main / root publishing mode working.
+// Publish generated assets at the repository root for GitHub Pages.
 const publicFiles = ['index.html', 'manifest.webmanifest', 'pwa.js', 'sw.js', '.nojekyll',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 fs.mkdirSync(path.join(root, 'icons'), { recursive: true });
