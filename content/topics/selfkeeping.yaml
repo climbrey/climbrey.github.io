@@ -1,0 +1,13 @@
+order: 70
+id: selfkeeping
+name: 留住心里的一点清光
+subtitle: 在竹、梅、莲与香草间，读自己的选择。
+scene: bamboo
+works:
+  - zhushi
+  - momei
+  - ailianshuo
+  - bosuanzi-114
+  - lisao
+  - baorenanshu
+tag: resolve

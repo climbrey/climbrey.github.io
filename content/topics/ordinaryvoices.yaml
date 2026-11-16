@@ -1,0 +1,15 @@
+order: 60
+id: ordinaryvoices
+name: 听见寻常人的声音
+subtitle: 从一粒米、一间屋，看见他人的生活。
+scene: water
+works:
+  - minnong
+  - minnong-42
+  - jiangshangyuzhe
+  - maitanweng
+  - shihaoli
+  - maowuweiqiufengsuopoge
+  - shiwucongjunzheng
+  - pipaxingbingxu
+tag: compassion

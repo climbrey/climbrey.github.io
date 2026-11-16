@@ -1,0 +1,13 @@
+order: 50
+id: rainletters
+name: 听雨，也听心事
+subtitle: 同样的雨声，落在不同的人生里。
+scene: rain
+works:
+  - chunyu
+  - liuyueershiqiriwanghulouzuishu
+  - yinhu
+  - yeyujibei
+  - shiyiyuesirifengyudazuo
+  - shengshengman
+tag: rain

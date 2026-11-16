@@ -1,11 +1,15 @@
 order: 30
 id: ordinary
-name: 寻常日子，也有诗意
-subtitle: 一场小雨，一朵初生的荷。
+name: 把日子读成诗
+subtitle: 小小的动作，藏着生活的亮光。
 scene: flower
 works:
-  - chunyu
-  - xiaochi
+  - chishang
+  - xiaoerchuidiao
+  - zhizinongbing
+  - suojian
+  - cunju
+  - kezhi
   - yueke
-  - yinhu
-tag: quiet
+  - xiaochi
+tag: joy

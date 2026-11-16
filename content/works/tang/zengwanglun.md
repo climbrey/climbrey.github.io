@@ -68,4 +68,7 @@ related:
 
 ## 出处与资料 {#sources}
 
+- 原文对照：https://www.gushiwen.cn/shiwenv_ca9eaf40a6ce.aspx
 - 李白《赠汪伦》。
+- 作者资料参阅：https://www.gushiwen.cn/authorv.aspx?name=%E6%9D%8E%E7%99%BD
+- 文字整理：原文按所列公开文本核对，标点、繁简与分行作阅读整理；注释、导读与赏析为山月编写。2026-11-16。

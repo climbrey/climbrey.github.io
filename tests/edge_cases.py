@@ -31,6 +31,7 @@ with sync_playwright() as p:
     work=next(w for w in data['works'] if w['id']=='niaomingjian')
     payload='<img src=x onerror="window.__import_executed=true">'
     work['reading'][0]['text']=payload
+    work['sources']=[payload, 'javascript:alert(1)', '原文：https://example.com/reference?x=1&y=2；补充说明。']
     config_payload='<img src=x onerror="window.xss=1">'
     data['discovery']['landscape'][0]['label']=config_payload
     data['discovery']['motifs'][0]['hint']=config_payload
@@ -45,6 +46,11 @@ with sync_playwright() as p:
     expect(page.locator('[data-module="reading"] .module-body')).to_contain_text(payload)
     assert page.locator('[data-module="reading"] img').count()==0
     assert page.evaluate('window.__import_executed === undefined')
+    page.locator('[data-module="sources"] summary').click()
+    expect(page.locator('[data-module="sources"] .source-link')).to_have_count(1)
+    expect(page.locator('[data-module="sources"] .source-link')).to_have_attribute('href', 'https://example.com/reference?x=1&y=2')
+    expect(page.locator('[data-module="sources"]')).to_contain_text('；补充说明。')
+    assert page.locator('[data-module="sources"] img').count()==0
     page.goto(URL+'#home')
     expect(page.locator('.motifs')).to_contain_text(config_payload)
     assert page.locator('.motifs img').count()==0

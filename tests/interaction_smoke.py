@@ -37,6 +37,7 @@ with sync_playwright() as p:
         CanvasRenderingContext2D.prototype.fillText = function(...args) { window.cardText.push(args[0]); return fill.apply(this, args); };
     ''')
     page.goto(URL)
+    corpus = page.evaluate('JSON.parse(document.querySelector("#library-data").textContent).works')
     settle(page)
     entries=page.locator('.discovery-entries').bounding_box()
     nav_top=page.locator('.mobile-nav').bounding_box()['y']
@@ -57,7 +58,7 @@ with sync_playwright() as p:
     page.screenshot(path=str(OUT / 'mobile-explore.png'), animations='disabled')
     page.locator('.discovery-card[data-id="moon"]').click()
     page.locator('#search').fill('李白')
-    expect(page.locator('.work-tile')).to_have_count(1)
+    expect(page.locator('.work-tile')).to_have_count(sum(w['author'] == 'libai' and 'moon' in w['tags'] for w in corpus))
     page.locator('[data-action="filters"]').click()
     page.locator('#stage-filter').select_option(label='小学')
     close_surface(page)
@@ -85,18 +86,18 @@ with sync_playwright() as p:
     print(f'PASS: first result at {first_result_y:.0f}px; filters and scroll survive both return paths', flush=True)
 
     page.locator('[data-action="clear-filters"]').click()
-    expect(page.locator('.work-tile')).to_have_count(17)
+    expect(page.locator('.work-tile')).to_have_count(len(corpus))
     page.locator('#search').evaluate('''el => {
         el.focus(); el.dispatchEvent(new CompositionEvent('compositionstart', {bubbles:true}));
         el.value = 'libai'; el.dispatchEvent(new InputEvent('input', {bubbles:true, isComposing:true}));
     }''')
     page.wait_for_timeout(180)
-    expect(page.locator('.work-tile')).to_have_count(17)
+    expect(page.locator('.work-tile')).to_have_count(len(corpus))
     assert 'q=' not in page.evaluate('location.hash')
     page.locator('#search').evaluate('''el => {
         el.value = '李白'; el.dispatchEvent(new CompositionEvent('compositionend', {bubbles:true}));
     }''')
-    expect(page.locator('.work-tile')).to_have_count(3)
+    expect(page.locator('.work-tile')).to_have_count(sum(w['author'] == 'libai' for w in corpus))
     expect(page.locator('#search')).to_be_focused()
     print('PASS: Chinese composition leaves results intact until the text is committed', flush=True)
 

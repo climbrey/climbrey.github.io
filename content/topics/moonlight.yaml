@@ -1,11 +1,14 @@
 order: 10
 id: moonlight
 name: 月色里的不同心事
-subtitle: 一轮月，照见几种人生。
+subtitle: 从童年的玉盘，读到远方的牵挂。
 scene: moon
 works:
   - niaomingjian
+  - gulangyuexing
   - jingyesi
+  - wenwangchanglingzuoqianlongbiaoyaoyouciji
   - shuidiaogetou
+  - chunjianghuayueye
   - chengtian
 tag: moon

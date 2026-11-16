@@ -1,0 +1,13 @@
+order: 40
+id: farewell
+name: 送你一程
+subtitle: 劝一杯酒，或再望一会儿江面。
+scene: water
+works:
+  - songyuanershianxi
+  - huanghelousongmenghaoranzhiguangling
+  - songdushaofuzhirenshuzhou
+  - songyouren
+  - baixuegesongwupanguanguijing
+  - yulinling
+tag: farewell

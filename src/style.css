@@ -50,3 +50,4 @@ body[data-page=card] .site-header,body[data-page=card] .mobile-nav,body[data-pag
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
 
 .module-body p{white-space:pre-wrap}
+.source-link{color:var(--green);text-decoration:underline;text-underline-offset:4px;display:inline-block;min-height:36px;padding:2px 4px}

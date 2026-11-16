@@ -1,11 +1,15 @@
 order: 20
 id: mountainlife
-name: 把心放进山水里
-subtitle: 循着水声，往幽静处走。
+name: 山中，有自己的天地
+subtitle: 沿着小径，遇见安静，也遇见自己。
 scene: mountain
 works:
+  - luchai
   - shanju
+  - guiyuan
   - shanzhong
-  - zhuliguan
-  - jiangxue
-tag: mountain
+  - xunyinzhebuyu
+  - xiaoshitanji
+  - taohuayuanji
+  - guiqulaixicibingxu
+tag: nature

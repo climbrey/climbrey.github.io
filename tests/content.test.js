@@ -6,6 +6,7 @@ const ids = new Set(data.works.map(w => w.id));
 assert.strictEqual(ids.size, data.works.length, '作品标识必须唯一');
 assert(data.works.length > 0, '内容库需至少有一篇作品');
 const tags = new Map(data.tags.map(t => [t.id,t]));
+const plain = text => text.replace(/[\p{P}\p{Z}\s]/gu, '');
 assert.strictEqual(tags.size, data.tags.length, '标签标识必须唯一');
 for (const tag of data.tags) {
   const visited = new Set([tag.id]);
@@ -20,6 +21,15 @@ for (const w of data.works) {
   assert(data.authors[w.author], w.title + ' 缺少作者');
   assert(w.lines.length && w.lines.every(l => l.trim()), w.title + ' 原文为空');
   assert(Array.isArray(w.notes) && Array.isArray(w.reading) && Array.isArray(w.sources), w.title + ' 详情类型无效');
+  assert(data.authors[w.author].bio.trim() && w.intro.trim() && w.background.trim() && w.thought.trim(), w.title + ' 缺少正式导读');
+  assert(w.notes.length >= 2 && w.reading.length >= 2, w.title + ' 需有字词与具体细读');
+  assert(w.sources.some(s => /https:\/\/[^\s]+/.test(s)), w.title + ' 缺少原文对照链接');
+  assert(!w.lines.some(l => /一作[：:]|通[：:]|同[：:]/.test(l)), w.title + ' 版本旁注不应混入原文');
+  for (const r of w.reading) {
+    assert(r.title.trim() && r.text.trim() && r.quote.trim(), w.title + ' 细读不完整');
+    assert(plain(w.lines.join('') + w.preface).includes(plain(r.quote)), w.title + ' 细读引文应与原文一致：' + r.quote);
+  }
+  if (w.title.includes('节选')) assert(w.sources.some(s => /节选范围|节选自|选文/.test(s)), w.title + ' 需说明节选首尾');
   assert(w.quote.length && w.quote.every(i => Number.isInteger(i) && i >= 0 && i < w.lines.length), w.title + ' 选句越界');
   assert(w.tags.every(t => tags.has(t)), w.title + ' 标签不存在');
   assert(w.related.every(r => ids.has(r.id) && r.id !== w.id && r.reason), w.title + ' 关联无效');

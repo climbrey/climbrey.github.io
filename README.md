@@ -44,6 +44,7 @@ python -m pip install --target .tools/test_deps playwright==1.58.0
 python tests/preview_smoke.py
 python tests/edge_cases.py
 python tests/content_updates.py
+python tests/corpus_smoke.py
 python tests/interaction_smoke.py
 python tests/pwa_smoke.py
 python tests/pwa_smoke.py --root

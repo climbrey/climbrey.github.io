@@ -75,5 +75,8 @@ related:
 
 ## 出处与资料 {#sources}
 
+- 原文对照：https://www.gushiwen.cn/shiwenv_8ec950bd1395.aspx
 - 王维《皇甫岳云溪杂题五首》其一。
 - 原文采用现代通行标点；赏读为本工具编写。
+- 作者资料参阅：https://www.gushiwen.cn/authorv.aspx?name=%E7%8E%8B%E7%BB%B4
+- 文字整理：原文按所列公开文本核对，标点、繁简与分行作阅读整理；注释、导读与赏析为山月编写。2026-11-16。

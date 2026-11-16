@@ -1,0 +1,13 @@
+order: 90
+id: music
+name: 听一曲，看一幅画
+subtitle: 音乐、绘画和手艺，也能走进文字。
+scene: water
+works:
+  - huichongchunjiangwanjing
+  - momei
+  - hezhouji
+  - pipaxingbingxu
+  - lipingkonghouyin
+  - pusaman
+tag: art

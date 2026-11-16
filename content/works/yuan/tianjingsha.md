@@ -71,4 +71,7 @@ related:
 
 ## 出处与资料 {#sources}
 
+- 原文对照：https://www.gushiwen.cn/shiwenv_9dcf133d25cc.aspx
 - 马致远《天净沙·秋思》。
+- 作者资料参阅：https://www.gushiwen.cn/authorv.aspx?name=%E9%A9%AC%E8%87%B4%E8%BF%9C
+- 文字整理：原文按所列公开文本核对，标点、繁简与分行作阅读整理；注释、导读与赏析为山月编写。2026-11-16。

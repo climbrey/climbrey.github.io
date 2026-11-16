@@ -71,4 +71,7 @@ related:
 
 ## 出处与资料 {#sources}
 
+- 原文对照：https://www.gushiwen.cn/shiwenv_e5c9337524b7.aspx
 - 郑燮《竹石》，题画诗。
+- 作者资料参阅：https://www.gushiwen.cn/authorv.aspx?name=%E9%83%91%E6%9D%BF%E6%A1%A5
+- 文字整理：原文按所列公开文本核对，标点、繁简与分行作阅读整理；注释、导读与赏析为山月编写。2026-11-16。

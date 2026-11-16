@@ -176,6 +176,16 @@
     const footer=document.createElement('footer');footer.className='modal-footer';footer.innerHTML='<button class="text-btn" data-action="clear-filters">清除条件</button><button class="btn primary" data-action="close-modal" id="filter-count">查看 '+filteredWorks().length+' 篇作品</button>';dialog.appendChild(footer);
   }
 
+  function sourceMarkup(source) {
+    const pattern=/https?:\/\/[^\s<>"'，。；！？）】]+/g;
+    let html='',offset=0;
+    for(const match of source.matchAll(pattern)){
+      html+=esc(source.slice(offset,match.index));
+      html+='<a class="source-link" href="'+esc(match[0])+'" target="_blank" rel="noopener noreferrer">查看资料 ↗</a>';
+      offset=match.index+match[0].length;
+    }
+    return html+esc(source.slice(offset));
+  }
   function moduleContent(w,m) {
     const a=authorOf(w);
     switch(m.id){
@@ -184,7 +194,7 @@
       case 'background':return '<p>'+esc(w.background)+'</p>';
       case 'reading':return w.reading.map(r=>'<h4>'+esc(r.title)+'</h4><blockquote>'+esc(r.quote)+'</blockquote><p>'+esc(r.text)+'</p>').join('');
       case 'thought':return '<p>'+esc(w.thought)+'</p>';
-      case 'sources':return w.sources.map(s=>'<p>'+esc(s)+'</p>').join('')+'<p class="help">文字与解读可以分别阅读。存疑处保留说明，欢迎对照原作细看。</p>';
+      case 'sources':return w.sources.map(s=>'<p>'+sourceMarkup(s)+'</p>').join('')+'<p class="help">文字与解读可以分别阅读。存疑处保留说明，欢迎对照原作细看。</p>';
       default:return w.extra&&w.extra[m.id]?'<p style="white-space:pre-wrap">'+esc(w.extra[m.id])+'</p>':'';
     }
   }
@@ -472,7 +482,7 @@
     }catch(error){pendingImport=null;area.innerHTML='<p class="error" role="alert">'+esc(error.message)+'</p>';}
   }
   function about() {
-    openModal('关于这本小集','<div class="about-copy"><div class="about-brand">山月</div><p>在字里行间，遇见天地。</p><p>从一轮月、一阵风、一份心情出发，读到文字，也读到写下它的人。把喜欢的一句制成卡片，送给今天，或送给一个想起的人。</p><p class="tiny">当前为 MVP 预览，收录 '+library.works.length+' 篇代表作品。原文采用通行文本；作者与背景的存疑处保留说明，赏读为本工具编写。完整收录范围与逐版校勘将在后续完善。</p><p class="tiny">可离线阅读、制卡。收藏和设置留在当前浏览器；分享朋友圈时，请先保存图片后自行发布。</p></div>',true);
+    openModal('关于这本小集','<div class="about-copy"><div class="about-brand">山月</div><p>在字里行间，遇见天地。</p><p>从一轮月、一阵风、一份心情出发，读到文字，也读到写下它的人。把喜欢的一句制成卡片，送给今天，或送给一个想起的人。</p><p class="tiny">这本小集目前收录 '+library.works.length+' 篇古诗文。原文附对照来源，节选、异文与存疑处分别说明；注释和赏读为山月编写。学段仅是阅读参考标签。</p><p class="tiny">可离线阅读、制卡。收藏和设置留在当前浏览器；分享朋友圈时，请先保存图片后自行发布。</p></div>',true);
   }
 
   function normalizeState(raw) {
