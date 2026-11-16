@@ -5,6 +5,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'.tools/test_deps'))
 from playwright.sync_api import sync_playwright, expect
+from browser_helpers import open_card_panel, open_settings, close_surface
 OUT=ROOT/'test-results'
 URL=(ROOT/'offline.html').as_uri()
 
@@ -23,7 +24,7 @@ with sync_playwright() as p:
     page.locator('[data-action="saved-tab"][data-id="quotes"]').click()
     page.locator('[data-action="share-saved-quote"]').click()
     expect(page.locator('#share-image')).to_have_attribute('alt','静夜思分享卡：疑是地上霜。')
-    page.locator('[data-action="close-modal"]').click()
+    close_surface(page)
     print('PASS: saved quotations retain their own text when library content changes',flush=True)
 
     data=json.loads((ROOT/'src/content.json').read_text(encoding='utf-8'))
@@ -32,7 +33,7 @@ with sync_playwright() as p:
     work['reading'][0]['text']=payload
     source=OUT/'text-import.json'
     source.write_text(json.dumps({'format':'shanyue','version':1,'kind':'content','library':data},ensure_ascii=False),encoding='utf-8')
-    page.locator('[data-action="settings"]').click()
+    open_settings(page)
     page.locator('.settings-group summary').filter(has_text='导入、导出与备份').click()
     page.locator('#import-file').set_input_files(str(source))
     page.locator('[data-action="apply-import"]').click()
@@ -44,10 +45,12 @@ with sync_playwright() as p:
     print('PASS: imported annotation markup is displayed as text, never executed',flush=True)
 
     page.locator('.detail-actions [data-action="share"]').click()
+    open_card_panel(page, "quote")
     page.locator('[data-action="share-mode"][data-id="whole"]').click()
     for theme in ['paper','night','botanic']:
         page.locator('[data-action="share-theme"][data-id="'+theme+'"]').click()
         for ratio in ['portrait','square']:
+            open_card_panel(page, "layout")
             page.locator('[data-action="share-ratio"][data-id="'+ratio+'"]').click()
             expect(page.locator('#share-error')).not_to_be_visible()
             with page.expect_download() as downloaded:

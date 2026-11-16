@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / '.tools' / 'test_deps'))
 from playwright.sync_api import sync_playwright, expect
+from browser_helpers import open_card_panel, open_settings, close_surface
 
 OUT = ROOT / 'test-results'
 OUT.mkdir(exist_ok=True)
@@ -14,6 +15,7 @@ URL = (ROOT / 'offline.html').as_uri()
 
 def settle(page):
     page.evaluate('() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)))')
+    page.wait_for_function('document.getAnimations().every(a=>a.playState !== "running")',timeout=1500)
 
 
 def unlocked(page):
@@ -36,12 +38,16 @@ with sync_playwright() as p:
     ''')
     page.goto(URL)
     settle(page)
+    entries=page.locator('.discovery-entries').bounding_box()
+    nav_top=page.locator('.mobile-nav').bounding_box()['y']
+    assert entries['y']+entries['height'] < nav_top
     page.evaluate('window.originalTopics = document.querySelector(".topics")')
     title = page.locator('.hero-copy h2').inner_text()
-    page.locator('.shuffle').click()
+    shuffle = page.locator('.shuffle').bounding_box()
+    page.touchscreen.tap(shuffle['x']+shuffle['width']/2, shuffle['y']+shuffle['height']/2)
     expect(page.locator('.hero-copy h2')).not_to_have_text(title)
     assert page.evaluate('document.querySelector(".topics") === window.originalTopics')
-    assert page.evaluate('scrollY') == 0
+    assert page.evaluate('scrollY') == 0, page.evaluate('scrollY')
     print('PASS: shuffle replaces only the reading card and keeps the page position', flush=True)
 
     page.locator('.mobile-nav [data-nav="explore"]').click()
@@ -49,11 +55,13 @@ with sync_playwright() as p:
     first_result_y = page.locator('.work-tile').first.bounding_box()['y']
     assert first_result_y < 600, first_result_y
     page.screenshot(path=str(OUT / 'mobile-explore.png'), animations='disabled')
-    page.locator('.quick-landscape [data-id="moon"]').click()
+    page.locator('.discovery-card[data-id="moon"]').click()
     page.locator('#search').fill('李白')
     expect(page.locator('.work-tile')).to_have_count(1)
-    page.locator('#more-filters summary').click()
+    page.locator('[data-action="filters"]').click()
     page.locator('#stage-filter').select_option(label='小学')
+    close_surface(page)
+    settle(page)
     page.locator('.tile-link').first.scroll_into_view_if_needed()
     saved_y = page.evaluate('scrollY')
     saved_hash = page.evaluate('location.hash')
@@ -64,14 +72,17 @@ with sync_playwright() as p:
     settle(page)
     assert page.evaluate('location.hash') == saved_hash
     assert abs(page.evaluate('scrollY') - saved_y) < 3
-    expect(page.locator('#more-filters')).to_have_attribute('open', '')
-    expect(page.locator('#stage-filter')).to_have_value('小学')
+    assert 'stage=' in page.evaluate('location.hash')
     page.locator('.tile-link').first.click()
+    expect(page.locator('.detail-heading h1')).to_be_visible()
     page.go_back()
     expect(page.locator('#search')).to_have_value('李白')
     settle(page)
-    assert abs(page.evaluate('scrollY') - saved_y) < 3
-    print(f'PASS: first result at {first_result_y:.0f}px; filters, advanced panel and scroll survive both return paths', flush=True)
+    assert abs(page.evaluate('scrollY') - saved_y) < 3, (page.evaluate('scrollY'), saved_y)
+    page.locator('[data-action="filters"]').click()
+    expect(page.locator('#stage-filter')).to_have_value('小学')
+    close_surface(page)
+    print(f'PASS: first result at {first_result_y:.0f}px; filters and scroll survive both return paths', flush=True)
 
     page.locator('[data-action="clear-filters"]').click()
     expect(page.locator('.work-tile')).to_have_count(17)
@@ -102,16 +113,16 @@ with sync_playwright() as p:
     expect(page.locator('.verse-line').first).to_be_focused()
     print('PASS: prose annotations open beside the selected sentence and close without losing focus', flush=True)
 
-    page.evaluate('scrollTo(0, 350)')
+    page.locator('.site-footer [data-action="about"]').scroll_into_view_if_needed()
     settle(page)
     saved_y = page.evaluate('scrollY')
-    settings_box = page.locator('[data-action="settings"]').bounding_box()
+    settings_box = page.locator('.site-footer [data-action="about"]').bounding_box()
     page.touchscreen.tap(settings_box['x'] + settings_box['width'] / 2, settings_box['y'] + settings_box['height'] / 2)
     locked_top = page.evaluate('document.body.style.top')
     page.keyboard.press('Escape')
     unlocked(page)
     assert abs(page.evaluate('scrollY') - saved_y) < 3, (saved_y, locked_top, page.evaluate('scrollY'))
-    page.locator('[data-action="settings"]').click()
+    open_settings(page)
     page.evaluate('location.hash = "#saved"')
     expect(page.locator('.collection-tabs')).to_be_visible()
     settle(page)
@@ -122,25 +133,30 @@ with sync_playwright() as p:
     page.goto(URL + '#work/niaomingjian')
     page.locator('.detail-actions [data-action="share"]').click()
     expect(page.locator('#share-image')).to_be_visible()
+    settle(page)
     for width, height in [(390, 844), (320, 568)]:
         page.set_viewport_size({'width': width, 'height': height})
         for scroll in [0, 10000]:
-            page.locator('.modal-body').evaluate('(el, y)=>el.scrollTop=y', scroll)
+            page.evaluate('(y)=>scrollTo(0,y)', scroll)
             save = page.locator('[data-action="download-image"]')
             box = save.bounding_box()
             assert 0 <= box['x'] and box['x'] + box['width'] <= width
             assert 0 <= box['y'] and box['y'] + box['height'] <= height
-            assert save.evaluate('el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}')
+            assert save.evaluate('el=>{const r=el.getBoundingClientRect();return el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}'), save.evaluate('el=>{const r=el.getBoundingClientRect();return {hit:document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.outerHTML.slice(0,200),rect:[r.x,r.y,r.width,r.height],scroll:scrollY,vv:visualViewport.height}}')
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
-        page.locator('.modal-body').evaluate('el=>el.scrollTop=0')
+        page.evaluate('scrollTo(0,0)')
         page.screenshot(path=str(OUT / f'mobile-share-{width}.png'), animations='disabled')
         for theme in ['night', 'botanic', 'paper']:
             choice = page.locator(f'[data-action="share-theme"][data-id="{theme}"]')
             choice.click(timeout=3000)
             expect(choice).to_have_attribute('aria-pressed', 'true')
+        open_card_panel(page, 'note')
         page.locator('#share-note').click(timeout=3000)
         expect(page.locator('#share-note')).to_be_focused()
     page.set_viewport_size({'width': 390, 'height': 844})
+    page.locator('[data-action="zoom-card"]').click()
+    expect(page.locator('.full-card-preview')).to_be_visible()
+    close_surface(page)
     page.locator('#share-note').fill('风来月往')
     page.wait_for_timeout(220)
     count = page.evaluate('cardDraws')
@@ -160,11 +176,11 @@ with sync_playwright() as p:
     downloaded.value.save_as(str(png))
     assert png.read_bytes() == base64.b64decode(page.locator('#share-image').get_attribute('src').split(',', 1)[1])
     assert page.evaluate('JSON.parse(localStorage.getItem("shanyue.reading.v1")).state.records.at(-1).note') == '风来，月往。'
-    page.locator('[data-action="close-modal"]').click()
+    close_surface(page)
     unlocked(page)
     print('PASS: save stays visible on 320/390px screens; immediate download includes the latest text with one image render', flush=True)
 
-    page.locator('[data-action="settings"]').click()
+    open_settings(page)
     page.locator('.settings-group summary').filter(has_text='导入、导出与备份').click()
     with page.expect_download() as exported:
         page.locator('[data-action="export-html"]').click()
@@ -179,5 +195,63 @@ with sync_playwright() as p:
     offline.evaluate('scrollTo(0, 500)')
     assert offline.evaluate('scrollY') == 500
     print('PASS: exported HTML opens independently with a freely scrolling page', flush=True)
+    page.goto(URL + '#home')
+    expect(page.locator('.shuffle')).to_be_visible()
+    page.evaluate('''() => {
+        document.querySelector('.shuffle').click();
+        document.querySelector('.shuffle').click();
+        document.querySelector('.mobile-nav [data-nav="explore"]').click();
+        document.querySelector('.mobile-nav [data-nav="saved"]').click();
+    }''')
+    expect(page.locator('.collection-tabs')).to_be_visible()
+    page.wait_for_timeout(450)
+    expect(page.locator('.collection-tabs')).to_be_visible()
+    expect(page.locator('.reading-card')).to_have_count(0)
+    page.goto(URL + '#work/niaomingjian')
+    page.locator('.detail-actions [data-action="favorite"]').click()
+    expect(page.locator('.detail-actions [data-action="favorite"]')).to_have_attribute('aria-pressed','true')
+    page.locator('[data-action="undo"]').click()
+    expect(page.locator('.detail-actions [data-action="favorite"]')).to_have_attribute('aria-pressed','false')
+    page.locator('[data-action="dismiss-hint"]').click()
+    page.reload()
+    expect(page.locator('.poem-hint')).to_have_count(0)
+    for width in [320,390,768,1440]:
+        page.set_viewport_size({'width':width,'height':900})
+        for route in ['home','explore','work/chengtian','saved','card/niaomingjian']:
+            page.goto(URL + '#' + route)
+            expect(page.locator('body')).to_have_attribute('data-page', route.split('/')[0])
+            settle(page)
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width,route)
+    page.set_viewport_size({'width':320,'height':568})
+    page.goto(URL + '#work/chengtian')
+    expect(page.locator('body')).to_have_attribute('data-page', 'work')
+    settle(page)
+    open_settings(page)
+    page.locator('#font-size').fill('30')
+    close_surface(page)
+    page.evaluate('scrollTo(0,300)')
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    action = page.locator('.detail-actions [data-action="share"]')
+    assert action.evaluate('el=>{const r=el.getBoundingClientRect();return r.bottom<=innerHeight && el.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}')
+    page.screenshot(path=str(OUT / 'mobile-long-reader.png'), animations='disabled')
+    action.click()
+    expect(page.locator('#share-image')).to_be_visible()
+    page.reload()
+    expect(page.locator('#share-image')).to_be_visible()
+    page.go_back()
+    expect(page.locator('.detail-heading h1')).to_be_visible()
+    page.go_forward()
+    expect(page.locator('#share-image')).to_be_visible()
+    open_card_panel(page, 'note')
+    page.locator('#share-note').fill('风来，月往。')
+    settle(page)
+    page.screenshot(path=str(OUT / 'mobile-card-note.png'), animations='disabled')
+    print('PASS: 30px prose, fixed reading actions and card reload/back/forward', flush=True)
+    page.emulate_media(reduced_motion='reduce')
+    page.goto(URL + '#home')
+    page.locator('.shuffle').click()
+    settle(page)
+    assert page.evaluate('document.getAnimations().length') == 0
+    print('PASS: rapid navigation, favorite undo, dismissed hints, four widths and reduced-motion fallback', flush=True)
     assert not errors, errors
     browser.close()

@@ -17,9 +17,10 @@
   let currentHome = library.works.some(w => w.id === state.lastWork) ? state.lastWork : library.works[0].id;
   let explore = {search:'',tags:[],author:'',form:'',stage:'',topic:''};
   let savedTab = 'works', lastListing = '#home', previousRoute = '', toastTimer;
-  const positions = new Map(), expanded = new Map(), filterPanels = new Map();
+  const positions = new Map(), expanded = new Map();
   let share = null, pendingImport = null, returnFocus = null;
   let routeVersion = 0, focusSearch = false, searchTimer, shareTimer, shareKey = '', modalScroll = 0, modalLocked = false;
+  let shareReturn = '#home', shareTool = '', shuffleVersion = 0, shuffleAnimation, navigationVersion = 0, routeTransition, undoAction;
   const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   const dialog = $('#modal');
@@ -30,11 +31,16 @@
   const paths = {
     heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',
     arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',close:'<path d="m6 6 12 12M18 6 6 18"/>',
-    share:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 15h8M8 11h5M8 2v5m8-5v5"/>',
+    share:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 16 5-5 5 5 3-3 5 5"/><circle cx="15" cy="8" r="2"/>',
     shuffle:'<path d="m17 3 4 4-4 4M3 7h18M7 21l-4-4 4-4m14 4H3"/>',
     download:'<path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/>',
     search:'<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/>',
     back:'<path d="M20 12H4m6-6-6 6 6 6"/>',check:'<path d="m5 12 4 4L19 6"/>',
+    sliders:'<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2.5"/><circle cx="15" cy="17" r="2.5"/>',
+    book:'<path d="M3 4h7l2 2 2-2h7v16h-7l-2 1-2-1H3ZM12 6v15"/>',
+    pen:'<path d="m4 16 12-12 4 4L8 20H4v-4ZM13 7l4 4"/>',
+    stamp:'<path d="M8 16v-3l2-4V5a2 2 0 0 1 4 0v4l2 4v3M5 16h14v4H5Z"/>',
+    frame:'<rect x="5" y="3" width="14" height="18" rx="2"/>',
     wind:'<path d="M3 8h12a3 3 0 1 0-3-3M2 12h17a2 2 0 1 1-2 2M4 16h7a3 3 0 1 1-3 3"/>',
     flower:'<path d="M12 12C3 9 7 1 12 6c5-5 9 3 0 6ZM12 12c9-3 13 5 6 6-1 7-9 3-6-6ZM12 12c3 9-5 13-6 6-7-1-3-9 6-6Z"/>',
     snow:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3M3 11l4-1-1-4M18 18l-1-4 4-1M3 13l4 1-1 4M18 6l-1 4 4 1"/>',
@@ -44,41 +50,61 @@
   };
   const icon = name => '<svg viewBox="0 0 24 24" aria-hidden="true">'+(paths[name]||paths.arrow)+'</svg>';
 
-  function toast(message) {
-    const el=$('#toast'); el.textContent=message; el.classList.add('show'); clearTimeout(toastTimer);
-    toastTimer=setTimeout(()=>el.classList.remove('show'),3300);
+  function toast(message,undo=null) {
+    const el=$('#toast');undoAction=undo;el.innerHTML='<span>'+esc(message)+'</span>'+(undo?'<button data-action="undo">撤销</button>':'');el.classList.add('show');clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>{el.classList.remove('show');undoAction=null;},5000);
   }
   function persist() {
     try { localStorage.setItem(KEY,JSON.stringify({version:1,library,state})); storageAvailable=true; return true; }
     catch(error) { storageAvailable=false; toast('浏览器暂时无法保存，请在设置中导出备份。'); return false; }
   }
   function serifSize() { document.documentElement.style.setProperty('--reading-size',state.fontSize+'px'); }
-  function scene(type='mountain', id='scene') {
-    const palettes={moon:['#eff5ed','#c7dacc','#91b7a3','#648e7b'],mountain:['#f0f5e8','#cfdfba','#a2be96','#729a80'],water:['#ecf6f3','#c5e1d9','#9fc4b6','#659d90'],rain:['#f0f5f2','#d1e1d9','#a9c5b7','#7fa795'],snow:['#f6f8f5','#e1e9e0','#c2d4c6','#90b2a4'],bamboo:['#f2f5e7','#d7e3b8','#adc68c','#7fa272'],flower:['#faf4ec','#eadcce','#c8d4b3','#96b393']};
-    const colors=palettes[type]||palettes.mountain;
-    let accents='';
-    if(type==='rain') for(let i=0;i<12;i++) accents+='<path d="M'+(50+i*38)+' '+(30+i%4*24)+'l-9 32" stroke="'+colors[3]+'" opacity=".2"/>';
-    if(type==='snow') for(let i=0;i<16;i++) accents+='<circle cx="'+(i*43%520)+'" cy="'+(45+i*29%260)+'" r="2.5" fill="white"/>';
-    if(type==='flower') accents='<g fill="#dfb3a3"><circle cx="104" cy="352" r="8"/><circle cx="114" cy="345" r="6"/><circle cx="115" cy="358" r="6"/><circle cx="83" cy="330" r="4"/></g>';
-    return '<svg viewBox="0 0 520 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="'+id+'-sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="'+colors[0]+'"/><stop offset="1" stop-color="#fbfcf7"/></linearGradient><linearGradient id="'+id+'-hill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="'+colors[2]+'"/><stop offset="1" stop-color="'+colors[1]+'"/></linearGradient></defs><rect width="520" height="500" fill="url(#'+id+'-sky)"/><circle cx="360" cy="128" r="48" fill="#fffdf3"/><circle cx="360" cy="128" r="59" fill="none" stroke="#ffffff" opacity=".65"/><path d="M-40 340C35 329 52 263 121 264S202 178 250 219s60 50 114 40 95-54 186-12V500H-40Z" fill="'+colors[1]+'" opacity=".62"/><path d="M-25 419c82-75 126-17 181-54s91-123 159-87 121 112 225 51v171H-25Z" fill="url(#'+id+'-hill)" opacity=".78"/><path d="M-20 462c95-55 141-11 211-29s106-70 181-46 104 56 169 27v86H-20Z" fill="'+colors[3]+'" opacity=".55"/><path d="M120 406c74 9 112-31 178-13M214 423c66-12 83-8 130-3" fill="none" stroke="#f8fbf5" stroke-width="2" opacity=".65"/><path d="M92 133q8-6 16 0 8-6 16 0m19 14q6-5 12 0 6-5 12 0" fill="none" stroke="'+colors[3]+'" stroke-width="1.5" opacity=".65"/><g fill="none" stroke="'+colors[3]+'" stroke-width="1.5" opacity=".45"><path d="M63 472q27-81 23-143M84 390q-37-9-33-30 24-5 33 30M87 363q24-31 42-19-8 20-42 19"/></g>'+accents+'</svg>';
+  function scene(type='mountain',id='scene') {
+    const palettes={moon:['#eef0e4','#becdb5','#597e6d'],mountain:['#edf0e5','#b9c9a7','#648776'],water:['#e7efeb','#b4d1c6','#5b887b'],rain:['#e4eeea','#b2c7bc','#668d7e'],snow:['#f0f1eb','#d0dcd2','#8aa396'],bamboo:['#e9efdf','#b6c69b','#64865d'],flower:['#f3eae0','#d8c6ad','#a87963']};
+    const [sky,soft,ink]=palettes[type]||palettes.mountain;
+    const lake='<path d="M-20 366Q140 300 300 346T550 332V500H-20Z" fill="'+soft+'" opacity=".42"/><g fill="none" stroke="'+ink+'" opacity=".24"><path d="M90 390q140-35 380 0M45 418q220-40 455-4M180 448q120-18 280-3"/></g>';
+    const leaves='<g fill="none" stroke="'+ink+'" stroke-width="2" opacity=".65"><path d="M423 520q-10-146-75-256M468 510q-44-87-35-193"/></g><g fill="'+ink+'" opacity=".45"><path d="M397 408q-80-16-70-90 64 20 70 90M409 431q8-77 59-89 5 62-59 89M365 318q-50-18-48-61 44 8 48 61M446 430q-39-36-29-77 32 20 29 77"/></g>';
+    let art='';
+    if(type==='moon')art='<circle cx="356" cy="134" r="65" fill="#fffbed"/><circle cx="356" cy="134" r="79" fill="none" stroke="#fffbed" opacity=".45"/>'+lake+leaves+'<path d="M244 237q10-9 20 0 9-9 18 0m-30 25q7-6 14 0 7-6 14 0" stroke="'+ink+'" stroke-width="2" fill="none" opacity=".65"/>';
+    else if(type==='flower')art='<circle cx="360" cy="135" r="68" fill="#fbf4e6"/><path d="M515 510Q388 319 244 155M378 326l81-118M316 242l-76-10" stroke="#8f9b75" stroke-width="4" fill="none"/><g fill="#c99682" opacity=".72">'+[[269,190],[315,243],[393,287],[449,222],[361,331]].map(([x,y])=>'<g transform="translate('+x+' '+y+')"><ellipse rx="10" ry="23" transform="rotate(-38)"/><ellipse rx="10" ry="23" transform="rotate(38)"/><ellipse rx="10" ry="23" transform="rotate(90)"/><circle r="5" fill="#e6cbaa"/></g>').join('')+'</g><path d="M422 410q-75 5-83-63 56 1 83 63M295 214q-41 11-49-33 40-4 49 33" fill="#9aaa80" opacity=".75"/>';
+    else if(type==='rain'||type==='bamboo')art='<path d="M0 403Q160 369 520 407V500H0Z" fill="'+soft+'" opacity=".4"/>'+Array.from({length:3},(_,i)=>'<g stroke="'+ink+'" stroke-width="3" fill="none" opacity="'+(.4+i*.15)+'"><path d="M'+(320+i*60)+' 510l'+(15-i*17)+'-350"/><path d="M'+(326+i*56)+' 310l52-57m-52 57-54-30m54-90 42-40"/></g><g fill="'+ink+'" opacity=".5"><path d="M'+(330+i*55)+' 307q50-67 72-53-27 40-72 53m0 0q-48-46-65-32 32 31 65 32"/></g>').join('')+(type==='rain'?'<g stroke="#638e83" stroke-width="1" opacity=".3">'+Array.from({length:19},(_,i)=>'<path d="M'+(50+i*28)+' '+(30+i%4*45)+'l-20 95"/>').join('')+'</g>':'');
+    else if(type==='water')art='<circle cx="345" cy="110" r="40" fill="#f9f7e9"/><path d="M160 330q65-105 125-79t119-55 140 101v203H160Z" fill="'+soft+'" opacity=".48"/>'+lake+'<path d="M288 366h94l-18 15h-58Z" fill="'+ink+'"/><path d="M336 366v-69l42 59h-42" fill="#f9f6e9" stroke="'+ink+'" stroke-width="1.5"/><path d="M313 396h71" stroke="'+ink+'" opacity=".4"/>';
+    else art='<circle cx="352" cy="115" r="46" fill="#fbf8e8"/><path d="M44 397 230 157q12-14 24 0l94 135 80-110 127 188v130H44Z" fill="'+soft+'" opacity=".6"/><path d="M90 458 306 246q15-16 28 2l195 185v67H90Z" fill="'+ink+'" opacity=".28"/><path d="M-20 478Q160 416 300 452T550 428v72H-20Z" fill="'+ink+'" opacity=".33"/>'+(type==='snow'?'<path d="m206 185 24-28q12-14 24 0l37 52-34-7-16-15-15 10Z" fill="#fffef8"/>'+Array.from({length:15},(_,i)=>'<circle cx="'+(180+i*43%330)+'" cy="'+(35+i*31%300)+'" r="3" fill="#fff"/>').join(''):leaves);
+    return '<svg viewBox="0 0 520 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="'+id+'-sky" x2="0" y2="1"><stop stop-color="'+sky+'"/><stop offset="1" stop-color="#f7f6ed"/></linearGradient></defs><rect width="520" height="500" fill="url(#'+id+'-sky)"/>'+art+'</svg>';
   }
   function tagButton(id) { const t=tagById(id);return t?'<button class="tag" data-action="tag" data-id="'+esc(id)+'">'+esc(t.name)+'</button>':''; }
   function favoriteButton(w,tile=false) { const active=state.favorites.includes(w.id);return '<button class="'+(tile?'icon-btn tile-save':'btn')+(active?' is-saved active':'')+'" data-action="favorite" data-id="'+esc(w.id)+'" aria-label="'+(active?'取消收藏':'收藏')+esc(w.title)+'" aria-pressed="'+active+'">'+icon('heart')+(tile?'':(active?'已收藏':'收藏'))+'</button>'; }
-  function tile(w,index=0) {
-    const a=authorOf(w), q=w.quote.map(i=>w.lines[i]).join('\n');
-    return '<article class="work-tile"><a class="tile-link" href="#work/'+esc(w.id)+'"><h3>'+esc(w.title)+'</h3><p class="tile-author">'+esc(a.dynasty)+' · '+esc(a.name)+'</p><p class="tile-quote">'+esc(q)+'</p></a>'+favoriteButton(w,true)+'<div class="tile-bottom"><span>'+esc((tagById(w.tags[0])||{}).name||w.form)+' · '+esc((tagById(w.tags[1])||{}).name||'诗意')+'</span><a href="#work/'+esc(w.id)+'" aria-label="阅读'+esc(w.title)+'">读一读 ↗</a></div></article>';
+  function tile(w) {
+    const a=authorOf(w),q=w.quote.slice(0,2).map(i=>w.lines[i]).join('\n');
+    return '<article class="work-tile"><a class="tile-link" href="#work/'+esc(w.id)+'"><h3>'+esc(w.title)+'</h3><p class="tile-author">'+esc(a.dynasty)+' · '+esc(a.name)+'</p><p class="tile-quote">'+esc(q)+'</p></a>'+favoriteButton(w,true)+'<div class="tile-bottom"><span>'+esc(w.tags.slice(0,2).map(id=>tagById(id)?.name).filter(Boolean).join(' · ')||w.form)+'</span><a href="#work/'+esc(w.id)+'" aria-label="阅读'+esc(w.title)+'">读这篇 '+icon('arrow')+'</a></div></article>';
   }
   function readingCard() {
     const w=workById(currentHome)||library.works[0],a=authorOf(w);
-    const isLong=w.lines.length>8||w.lines.join('').length>100;
+    const isLong=w.lines.length>4||w.lines.join('').length>70;
     const lines=isLong?w.quote.map(i=>w.lines[i]):w.lines;
-    return '<section class="reading-card" aria-label="随读作品"><div class="hero-copy"><div class="hero-meta"><span>此刻，读一篇'+(isLong?' · 节选':'')+'</span><button class="text-btn shuffle" data-action="shuffle">'+icon('shuffle')+' 换一篇</button></div><h2>'+esc(w.title)+'</h2><p class="byline">'+esc(a.dynasty)+' · '+esc(a.name)+'</p><div class="hero-verse">'+lines.map(l=>'<p>'+esc(l)+'</p>').join('')+'</div><div class="hero-tags">'+w.tags.slice(0,3).map(tagButton).join('')+'</div><div class="hero-actions"><a class="btn primary" href="#work/'+esc(w.id)+'">读深一点 '+icon('arrow')+'</a>'+favoriteButton(w,true).replace('icon-btn tile-save','icon-btn')+'<button class="icon-btn" data-action="share" data-id="'+esc(w.id)+'" aria-label="生成分享卡" title="生成分享卡">'+icon('share')+'</button></div></div><div class="hero-art">'+scene(w.scene,'hero')+'<span class="art-label">'+esc(w.intro)+'</span><span class="art-seal">山月</span></div></section>';
+    return '<section class="reading-card" aria-label="此刻的作品"><div class="poem-cover"><div class="hero-copy"><p class="hero-meta">此刻，遇见一篇文字'+(isLong?' · 节选':'')+'</p><h2><a href="#work/'+esc(w.id)+'">'+esc(w.title)+'</a></h2><p class="byline">'+esc(a.dynasty)+' · '+esc(a.name)+'</p><div class="hero-verse">'+lines.map(l=>'<p>'+esc(l)+'</p>').join('')+'</div></div><div class="hero-art">'+scene(w.scene,'hero')+'</div><span class="art-seal">山月</span></div><div class="hero-actions"><a class="btn primary" href="#work/'+esc(w.id)+'">'+(isLong?'阅读全文':w.form.includes('古文')?'读这篇文字':'读这首诗')+' '+icon('arrow')+'</a><button class="text-btn shuffle" data-action="shuffle">'+icon('shuffle')+' 换一篇</button></div></section>';
   }
   function home() {
-    const motifs=[['wind','风','风起有声','#edf4ee'],['flower','花','花开有时','#faf0e8'],['snow','雪','天地留白','#eef3f4'],['moon','月','千里同光','#f6f1df'],['mountain','山','山中回响','#edf3e4'],['rain','雨','听雨片刻','#eaf3f0']];
-    const others=library.works.filter(w=>w.id!==currentHome).slice(0,3);
-    return '<section class="home-intro"><div><p class="eyebrow"><span class="tiny-leaf">✧</span> 一页诗文，一次相逢</p><h1>留一点时间，<span>给一首诗。</span></h1></div><p class="intro-side">风来，月往。<br>总有一句，与你相逢。</p></section>'+readingCard()+'<section><div class="section-heading"><div><h2>循着一缕诗意</h2><p>从眼前的景，走进心里的远方。</p></div><a class="text-btn" href="#explore">随心寻篇 '+icon('arrow')+'</a></div><div class="motifs">'+motifs.map(([id,name,note,color])=>'<button class="motif" data-action="tag" data-id="'+id+'"><span class="motif-orb" style="--orb:'+color+'">'+icon(id)+'</span><span class="motif-name">'+name+'<span class="motif-note">'+note+'</span></span></button>').join('')+'</div></section><section><div class="section-heading"><div><h2>走一条诗里的小径</h2><p>同一种风景，不同的心事。</p></div><span class="mobile-only swipe-hint">轻滑看看 →</span></div><div class="topics">'+library.topics.map((t,i)=>'<a class="topic-card topic-'+i+'" href="#explore?topic='+encodeURIComponent(t.id)+'">'+scene(t.scene,'topic'+i)+'<span class="topic-kicker">诗意小集 · 0'+(i+1)+'</span><h3>'+esc(t.name)+'</h3><p>'+esc(t.subtitle)+'</p><span class="topic-arrow">'+icon('arrow')+'</span></a>').join('')+'</div></section><section><div class="section-heading"><div><h2>不妨，再读一篇</h2><p>把喜欢的文字，慢慢留在身边。</p></div><a class="text-btn" href="#explore">全部作品 '+icon('arrow')+'</a></div><div class="work-grid home-recommendations">'+others.map(tile).join('')+'</div></section>';
+    const motifs=[['moon','月','一轮清光'],['rain','雨','听雨片刻'],['mountain','山','山中有声'],['flower','花','花开有时'],['snow','雪','天地留白'],['wind','风','风起有声']];
+    const topic=library.topics[0];
+    return '<h1 class="sr-only">山月 · 遇见文字里的天地</h1><div class="home-stage">'+readingCard()+'<section class="home-paths"><div class="desktop-intro"><p class="eyebrow">不赶路的时候</p><h2>留一点时间，<br>给眼前的诗。</h2><p>从一轮月、一阵风，走进心里的远方。</p></div><div class="discovery-entries"><a href="#explore" class="discovery-entry"><strong>按风景找</strong><span>月色、花事、山川</span>'+icon('arrow')+'</a><a href="#explore?view=feeling" class="discovery-entry"><strong>按心情找</strong><span>思念、闲适、旷达</span>'+icon('arrow')+'</a></div>'+(topic?'<a class="editorial-link" href="#explore?topic='+encodeURIComponent(topic.id)+'"><span class="editorial-mark">月</span><span><strong>'+esc(topic.name)+'</strong><small>'+esc(topic.subtitle)+'</small></span>'+icon('arrow')+'</a>':'')+'</section></div><section><div class="section-heading"><div><p class="eyebrow">诗里的风景</p><h2>你想走近哪一处？</h2></div><a class="text-btn" href="#explore">全部线索 '+icon('arrow')+'</a></div><div class="motifs">'+motifs.filter(([id])=>tagById(id)).map(([id,name,note])=>'<button class="motif" data-action="tag" data-id="'+id+'"><span class="motif-orb">'+icon(id)+'</span><span class="motif-name">'+name+'<span class="motif-note">'+note+'</span></span></button>').join('')+'</div></section><section><div class="section-heading"><div><p class="eyebrow">一组文字，一次漫游</p><h2>走一条诗里的小径</h2></div></div><div class="topics">'+library.topics.map((t,i)=>'<a class="topic-card topic-'+i+'" href="#explore?topic='+encodeURIComponent(t.id)+'"><div class="topic-art">'+scene(t.scene,'topic'+i)+'</div><div class="topic-copy"><span class="topic-kicker">诗意小集</span><h3>'+esc(t.name)+'</h3><p>'+esc(t.subtitle)+'</p><span class="topic-arrow">'+icon('arrow')+'</span></div></a>').join('')+'</div></section><section><div class="section-heading"><h2>不妨，再读一篇</h2><a class="text-btn" href="#explore">全部作品 '+icon('arrow')+'</a></div><div class="work-grid home-recommendations">'+library.works.filter(w=>w.id!==currentHome).slice(0,3).map(tile).join('')+'</div></section>';
   }
+  async function shuffleWork() {
+    const version=++shuffleVersion,route=routeVersion,old=$('.reading-card'),scroll=window.scrollY;
+    if(!old)return;
+    if(shuffleAnimation)shuffleAnimation.cancel();
+    let candidates=library.works.filter(w=>!recentHome.slice(-4).includes(w.id));if(!candidates.length)candidates=library.works;
+    const w=candidates[Math.floor(Math.random()*candidates.length)];
+    if(!reducedMotion()){shuffleAnimation=old.querySelector('.poem-cover').animate([{opacity:1,transform:'none'},{opacity:0,transform:'translateX(-18px) rotate(-.8deg)'}],{duration:140,easing:'ease-in'});await shuffleAnimation.finished.catch(()=>{});}
+    if(version!==shuffleVersion||route!==routeVersion)return;
+    currentHome=w.id;state.lastWork=w.id;recentHome.push(w.id);persist();
+    const holder=document.createElement('div');holder.innerHTML=readingCard();old.replaceWith(holder.firstElementChild);
+    $('.shuffle').focus({preventScroll:true});
+    window.scrollTo({top:scroll,behavior:'auto'});
+    requestAnimationFrame(()=>{if(version===shuffleVersion&&route===routeVersion)window.scrollTo({top:scroll,behavior:'auto'});});
+    if(!reducedMotion())$('.poem-cover').animate([{opacity:0,transform:'translateX(18px) rotate(.8deg)'},{opacity:1,transform:'none'}],{duration:210,easing:'cubic-bezier(.2,.7,.2,1)'});
+  }
+
   function rootTag(id) { let tag=tagById(id),n=0;while(tag&&tag.parent&&n++<30)tag=tagById(tag.parent);return tag?tag.id:id; }
   function descendant(id,parent) { let t=tagById(id),n=0;while(t&&n++<30){if(t.id===parent)return true;t=tagById(t.parent);}return false; }
   function filteredWorks() {
@@ -95,28 +121,41 @@
     const branch=(t,depth=0)=>'<button class="filter-chip '+(depth?'filter-child ':'')+(explore.tags.includes(t.id)?'selected':'')+'" data-action="filter" data-id="'+esc(t.id)+'" aria-pressed="'+explore.tags.includes(t.id)+'">'+(depth?'· ':'')+esc(t.name)+'</button>'+library.tags.filter(c=>c.parent===t.id).map(c=>branch(c,depth+1)).join('');
     return '<div class="filter-row"><span class="filter-label">'+esc(r.name)+'</span><div class="filter-options">'+members.map(t=>branch(t)).join('')+'</div></div>';
   }
+  function discoveryCards() {
+    const choices=explore.view==='feeling'?[['quiet','闲适','让心停一停','mountain'],['homesick','思念','寄给远方','moon'],['hope','旷达','天地开阔','water'],['friendship','友情','相知有回声','flower']]:[['moon','月','一轮清光','moon'],['rain','雨','听雨片刻','rain'],['mountain','山','山中有声','mountain'],['flower','花','花开有时','flower'],['snow','雪','天地留白','snow'],['water','水','循水而行','water']];
+    return choices.filter(([id])=>tagById(id)).map(([id,name,note,art])=>'<button class="discovery-card" data-action="filter" data-id="'+id+'" aria-pressed="'+explore.tags.includes(id)+'"><span class="discovery-art">'+scene(art,'find-'+id)+'</span><strong>'+name+'</strong><span>'+note+'</span><span class="selection-check" aria-hidden="true">'+icon('check')+'</span></button>').join('');
+  }
   function explorePage() {
     const topic=library.topics.find(t=>t.id===explore.topic);
-    const landscapes=['moon','wind','flower','snow','mountain','water','rain','bamboo'].filter(tagById);
-    return '<section class="explore-page"><p class="eyebrow">循景寻情，自在漫游</p><h1 id="explore-title" class="page-title">'+esc(topic?topic.name:'寻一篇，合此刻心意。')+'</h1><p id="explore-intro" class="page-intro">'+esc(topic?topic.subtitle:'一轮月，一阵风，或是一个记得的名字。')+'</p><div class="search-field">'+icon('search')+'<input id="search" type="search" value="'+esc(explore.search)+'" placeholder="篇名、诗句，或一个名字" aria-label="搜索篇名、诗句、作者" autocomplete="off"><button class="icon-btn search-clear" data-action="clear-search" aria-label="清除搜索" '+(!explore.search?'hidden':'')+'>'+icon('close')+'</button></div><div class="filter-panel"><div class="filter-row quick-landscape"><span class="filter-label">景物</span><div class="filter-options">'+landscapes.map(id=>'<button class="filter-chip '+(explore.tags.includes(id)?'selected':'')+'" data-action="filter" data-id="'+id+'" aria-pressed="'+explore.tags.includes(id)+'">'+esc(tagById(id).name)+'</button>').join('')+'</div></div>'+filterRow('feeling')+'<details id="more-filters"><summary class="filter-more">更多线索 <span>分类、作者、文体</span></summary>'+library.tags.filter(t=>!t.parent&&t.id!=='feeling').map(t=>filterRow(t.id)).join('')+'<div class="row"><label class="field"><span>作者</span><select id="author-filter"><option value="">所有作者</option>'+Object.entries(library.authors).map(([id,a])=>'<option value="'+esc(id)+'" '+(explore.author===id?'selected':'')+'>'+esc(a.dynasty+' · '+a.name)+'</option>').join('')+'</select></label><label class="field"><span>文体</span><select id="form-filter"><option value="">所有文体</option>'+Array.from(new Set(library.works.map(w=>w.form))).map(f=>'<option '+(explore.form===f?'selected':'')+'>'+esc(f)+'</option>').join('')+'</select></label><label class="field"><span>学段标签（可选）</span><select id="stage-filter"><option value="">不限</option>'+['小学','初中','高中'].map(stage=>'<option '+(stage===explore.stage?'selected':'')+'>'+stage+'</option>').join('')+'</select></label></div></details></div><div id="explore-results">'+exploreResults()+'</div></section>';
+    return '<section class="explore-page"><p class="eyebrow">循着喜欢，自在漫游</p><h1 id="explore-title" class="page-title">'+esc(topic?topic.name:'从眼前的景，走向心里的诗。')+'</h1><p id="explore-intro" class="page-intro">'+esc(topic?topic.subtitle:'一个熟悉的名字，一句记得的文字。')+'</p><div class="search-field">'+icon('search')+'<input id="search" type="search" value="'+esc(explore.search)+'" placeholder="搜索篇名、作者、诗句" aria-label="搜索篇名、诗句、作者" autocomplete="off"><button class="icon-btn search-clear" data-action="clear-search" aria-label="清除搜索" '+(!explore.search?'hidden':'')+'>'+icon('close')+'</button></div><div class="discovery-heading"><div class="discovery-tabs" aria-label="发现方式"><button data-action="explore-view" data-id="landscape" aria-pressed="'+(explore.view!=='feeling')+'">风景</button><button data-action="explore-view" data-id="feeling" aria-pressed="'+(explore.view==='feeling')+'">心境</button></div><button class="text-btn" data-action="filters">'+icon('sliders')+' 更多线索</button></div><div id="discovery-cards" class="discovery-cards">'+discoveryCards()+'</div><div id="explore-results">'+exploreResults()+'</div></section>';
   }
   function exploreResults() {
     const works=filteredWorks();
-    let filters=explore.tags.map(id=>'<button class="tag" data-action="filter" data-id="'+esc(id)+'">'+esc((tagById(id)||{}).name)+' <span aria-hidden="true">×</span></button>').join('');
-    if(explore.topic) filters+='<button class="tag" data-action="clear-topic">当前专题 ×</button>';
-    for(const key of ['author','form','stage']) if(explore[key]) filters+='<button class="tag" data-action="clear-condition" data-id="'+key+'">'+esc(key==='author'?(library.authors[explore.author]||{}).name||explore.author:explore[key])+' ×</button>';
-    const active=filters||explore.search;
-    return (filters?'<div class="selected-filters" aria-label="已选线索">'+filters+'</div>':'')+'<div class="result-heading"><span role="status" aria-live="polite">'+works.length+' 篇文字，等你停留</span>'+(active?'<button class="text-btn" data-action="clear-filters">清除筛选</button>':'<span>随心读，慢慢遇见</span>')+'</div>'+(works.length?'<div class="work-grid">'+works.map(tile).join('')+'</div>':'<div class="empty"><span class="empty-symbol">'+icon('search')+'</span><h2>这条小径，暂时还没有作品。</h2><p>试着少选一个条件，或换个词找找。</p><button class="btn" data-action="clear-filters">看看全部作品</button></div>');
+    let filters=explore.tags.map(id=>'<button class="tag" data-action="filter" data-id="'+esc(id)+'">'+esc((tagById(id)||{}).name)+' '+icon('close')+'</button>').join('');
+    if(explore.topic)filters+='<button class="tag" data-action="clear-topic">当前专题 '+icon('close')+'</button>';
+    for(const key of ['author','form','stage'])if(explore[key])filters+='<button class="tag" data-action="clear-condition" data-id="'+key+'">'+esc(key==='author'?(library.authors[explore.author]||{}).name||explore.author:explore[key])+' '+icon('close')+'</button>';
+    return (filters?'<div class="selected-filters" aria-label="已选线索">'+filters+'</div>':'')+'<div class="result-heading"><span role="status" aria-live="polite">'+works.length+' 篇文字，等你停留</span>'+(filters||explore.search?'<button class="text-btn" data-action="clear-filters">清除条件</button>':'<span>慢慢读，自在遇见</span>')+'</div>'+(works.length?'<div class="work-grid result-list">'+works.map(tile).join('')+'</div>':'<div class="empty"><h2>这条小径，暂时还没有作品。</h2><p>试着少选一个条件，或换个词找找。</p><button class="btn" data-action="clear-filters">看看全部作品</button></div>');
   }
   function updateResults() {
     const target=$('#explore-results');if(!target)return;
     target.innerHTML=exploreResults();
     $$('[data-action="filter"]').forEach(b=>{const active=explore.tags.includes(b.dataset.id);b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
     const topic=library.topics.find(t=>t.id===explore.topic);
-    $('#explore-title').textContent=topic?topic.name:'寻一篇，合此刻心意。';
-    $('#explore-intro').textContent=topic?topic.subtitle:'一轮月，一阵风，或是一个记得的名字。';
+    $('#explore-title').textContent=topic?topic.name:'从眼前的景，走向心里的诗。';
+    $('#explore-intro').textContent=topic?topic.subtitle:'一个熟悉的名字，一句记得的文字。';
     $('.search-clear').hidden=!explore.search;
+    if($('#filter-count'))$('#filter-count').textContent='查看 '+filteredWorks().length+' 篇作品';
   }
+  function openFilters() {
+    const selects='<div class="row">'+[['author','作者'],['form','文体'],['stage','学段标签（可选）']].map(([key,label])=>{
+      const options=key==='author'?Object.entries(library.authors).map(([id,a])=>[id,a.dynasty+' · '+a.name]):(key==='form'?Array.from(new Set(library.works.map(w=>w.form))):['小学','初中','高中']).map(v=>[v,v]);
+      return '<label class="field"><span>'+label+'</span><select id="'+key+'-filter"><option value="">不限</option>'+options.map(([value,name])=>'<option value="'+esc(value)+'" '+(explore[key]===value?'selected':'')+'>'+esc(name)+'</option>').join('')+'</select></label>';
+    }).join('')+'</div>';
+    openModal('沿着更多线索','<p class="modal-subtitle">同一类别可任选其一，不同类别会一起筛选。</p><div class="advanced-filters">'+library.tags.filter(t=>!t.parent).map(t=>filterRow(t.id)).join('')+selects+'</div>',true);
+    dialog.classList.add('filter-dialog');
+    const footer=document.createElement('footer');footer.className='modal-footer';footer.innerHTML='<button class="text-btn" data-action="clear-filters">清除条件</button><button class="btn primary" data-action="close-modal" id="filter-count">查看 '+filteredWorks().length+' 篇作品</button>';dialog.appendChild(footer);
+  }
+
   function moduleContent(w,m) {
     const a=authorOf(w);
     switch(m.id){
@@ -129,62 +168,85 @@
       default:return w.extra&&w.extra[m.id]?'<p style="white-space:pre-wrap">'+esc(w.extra[m.id])+'</p>':'';
     }
   }
+  function annotatedLine(line,notes) {
+    const terms=notes.map(n=>n.q).filter(q=>q&&line.includes(q)).sort((a,b)=>b.length-a.length);
+    let html='',i=0;
+    while(i<line.length){const term=terms.find(q=>line.startsWith(q,i));if(term){html+='<span class="annotated-word">'+esc(term)+'</span>';i+=term.length;}else html+=esc(line[i++]);}
+    return html;
+  }
   function detail(w) {
-    const a=authorOf(w),isProse=w.form.includes('古文');
-    const open=expanded.get(w.id)||[];
-    return '<div class="breadcrumb"><a href="'+esc(lastListing)+'">'+icon('back')+' 返回'+(lastListing.startsWith('#explore')?'寻篇':lastListing.startsWith('#saved')?'收藏':'随读')+'</a><span class="breadcrumb-divider">/</span><span>'+esc(w.title)+'</span></div><div class="detail-layout"><article class="poem-page"><header class="detail-heading"><h1>'+esc(w.title)+'</h1><p class="byline">'+esc(a.dynasty)+' · <a href="#explore?author='+encodeURIComponent(w.author)+'">'+esc(a.name)+'</a> · '+esc(w.form)+'</p></header>'+(w.preface?'<p class="work-preface">'+esc(w.preface)+'</p>':'')+'<div class="poem-lines '+(isProse?'prose':'')+'">'+w.lines.map((line,i)=>'<button class="verse-line" data-action="line" data-id="'+esc(w.id)+'" data-line="'+i+'" aria-expanded="false" aria-controls="line-note" aria-label="查看这句：'+esc(line)+'">'+esc(line)+'</button>').join('')+'</div><p class="poem-hint">轻点一句，看看字词，或把它留下。</p><div id="line-note"></div><div class="detail-actions">'+favoriteButton(w)+'<button class="btn primary" data-action="share" data-id="'+esc(w.id)+'">'+icon('share')+' 生成分享卡</button></div><div class="details-modules">'+library.modules.filter(m=>m.enabled).map(m=>{const c=moduleContent(w,m);return c?'<details class="content-module" data-module="'+esc(m.id)+'" '+(open.includes(m.id)?'open':'')+'><summary>'+esc(m.label)+'</summary><div class="module-body">'+c+'</div></details>':'';}).join('')+'</div></article><aside class="detail-aside"><div class="aside-art">'+scene(w.scene,'detail')+'</div><h2>沿着这些线索</h2><div class="tag-list">'+w.tags.map(tagButton).join('')+'</div><h2>诗意，还有回响</h2>'+(w.related||[]).filter(r=>workById(r.id)).map(r=>'<a class="related-item" href="#work/'+esc(r.id)+'"><h3>'+esc(workById(r.id).title)+' ↗</h3><p>'+esc(r.reason)+'</p></a>').join('')+(w.stage.length?'<p class="stage-note">学段标签'+w.stage.map(s=>'<span>'+esc(s)+'</span>').join('')+'</p>':'')+'</aside></div>';
+    const a=authorOf(w),isProse=w.form.includes('古文'),open=expanded.get(w.id)||[];
+    const teaser=w.reading[0],showTeaser=teaser&&library.modules.some(m=>m.id==='reading'&&m.enabled);
+    return '<div class="reader-top"><div class="breadcrumb"><a href="'+esc(lastListing)+'">'+icon('back')+' 返回'+(lastListing.startsWith('#explore')?'发现':lastListing.startsWith('#saved')?'收藏':'遇见')+'</a></div><button class="text-btn" data-action="settings">'+icon('sliders')+' 阅读设置</button></div><div class="detail-layout"><article class="poem-page"><header class="detail-heading"><p class="eyebrow">在字里行间，停一停</p><h1>'+esc(w.title)+'</h1><p class="byline">'+esc(a.dynasty)+' · <a href="#explore?author='+encodeURIComponent(w.author)+'">'+esc(a.name)+'</a> · '+esc(w.form)+'</p></header>'+(w.preface?'<p class="work-preface">'+esc(w.preface)+'</p>':'')+'<div class="poem-lines '+(isProse?'prose':'')+'">'+w.lines.map((line,i)=>'<button class="verse-line" data-action="line" data-id="'+esc(w.id)+'" data-line="'+i+'" aria-expanded="false" aria-controls="line-note" aria-label="查看这句：'+esc(line)+'">'+annotatedLine(line,w.notes)+'</button>').join('')+'</div>'+(!state.hintDismissed?'<div class="poem-hint"><span>轻点字词或诗句，读一处解释。</span><button class="text-btn" data-action="dismiss-hint" aria-label="不再显示阅读提示">知道了</button></div>':'')+'<div id="line-note"></div><div class="detail-actions">'+favoriteButton(w)+'<button class="btn primary" data-action="share" data-id="'+esc(w.id)+'">'+icon('share')+' 选句制作诗卡</button></div>'+(showTeaser?'<section class="reading-invitation"><p class="eyebrow">再读一层</p><h2>'+esc(teaser.title)+'</h2><p>'+esc(teaser.quote)+'</p><button class="text-btn" data-action="read-insight">看看这一处的妙处 '+icon('arrow')+'</button></section>':'')+'<div class="details-modules">'+library.modules.filter(m=>m.enabled).map(m=>{const c=moduleContent(w,m);return c?'<details class="content-module" data-module="'+esc(m.id)+'" '+(open.includes(m.id)?'open':'')+'><summary>'+esc(m.label)+'</summary><div class="module-body">'+c+'</div></details>':'';}).join('')+'</div></article><aside class="detail-aside"><div class="aside-art">'+scene(w.scene,'detail')+'</div><h2>沿着这些线索</h2><div class="tag-list">'+w.tags.map(tagButton).join('')+'</div><h2>诗意，还有回响</h2>'+(w.related||[]).filter(r=>workById(r.id)).map(r=>'<a class="related-item" href="#work/'+esc(r.id)+'"><h3>'+esc(workById(r.id).title)+' '+icon('arrow')+'</h3><p>'+esc(r.reason)+'</p></a>').join('')+(w.stage.length?'<p class="stage-note">学段标签'+w.stage.map(s=>'<span>'+esc(s)+'</span>').join('')+'</p>':'')+'</aside></div>';
   }
   function showLine(id,index,toggle=false) {
     const w=workById(id);if(!w||!w.lines[index])return;
-    const line=$$('.verse-line').find(b=>Number(b.dataset.line)===index),note=$('#line-note');
-    if(!line||!note)return;
+    const line=$$('.verse-line').find(b=>Number(b.dataset.line)===index),note=$('#line-note');if(!line||!note)return;
     const closing=toggle&&line.classList.contains('picked');
     $$('.verse-line').forEach(b=>{const picked=!closing&&b===line;b.classList.toggle('picked',picked);b.setAttribute('aria-expanded',String(picked));});
     if(closing){note.innerHTML='';return;}
-    const notes=w.notes.filter(n=>w.lines[index].includes(n.q));
-    const saved=state.quotes.some(q=>q.workId===id&&q.index===index);
-    note.innerHTML='<aside class="line-note" aria-label="句子注释"><div class="line-note-head"><span>这一句，慢慢读</span><button class="icon-btn" data-action="close-line" aria-label="收起句子注释">'+icon('close')+'</button></div><p class="line-title">'+esc(w.lines[index])+'</p>'+notes.map(n=>'<p><strong>'+esc(n.q)+'：</strong>'+esc(n.text)+'</p>').join('')+'<div class="row"><button class="btn small" data-action="save-quote" data-id="'+esc(id)+'" data-line="'+index+'">'+icon('heart')+(saved?'已收藏这句':'收藏这句')+'</button><button class="btn small" data-action="share-line" data-id="'+esc(id)+'" data-line="'+index+'">'+icon('share')+' 制成卡片</button></div></aside>';
+    const notes=w.notes.filter(n=>w.lines[index].includes(n.q)),saved=state.quotes.some(q=>q.workId===id&&q.index===index);
+    note.innerHTML='<aside class="line-note" aria-label="句子注释"><div class="line-note-head"><span>这一句，慢慢读</span><button class="icon-btn" data-action="close-line" aria-label="收起句子注释">'+icon('close')+'</button></div><p class="line-title">'+esc(w.lines[index])+'</p>'+(notes.length?notes.map(n=>'<p><strong>'+esc(n.q)+'：</strong>'+esc(n.text)+'</p>').join(''):'<p>把喜欢的这一句留下，也可以到下方的赏读中继续看看。</p>')+'<div class="row"><button class="btn small" data-action="save-quote" data-id="'+esc(id)+'" data-line="'+index+'">'+icon('heart')+(saved?'已收藏这句':'收藏这句')+'</button><button class="btn small" data-action="share-line" data-id="'+esc(id)+'" data-line="'+index+'">'+icon('share')+' 制作诗卡</button></div></aside>';
     line.insertAdjacentElement('afterend',note);
-    if(toggle)requestAnimationFrame(()=>{if(note.getBoundingClientRect().bottom>innerHeight-90)note.scrollIntoView({block:'nearest',behavior:reducedMotion()?'auto':'smooth'});});
+    if(toggle){if(!reducedMotion())note.animate([{opacity:0,transform:'translateY(-7px)'},{opacity:1,transform:'none'}],{duration:220,easing:'ease-out'});requestAnimationFrame(()=>{if(!note.isConnected)return;const r=note.getBoundingClientRect();if(r.bottom>innerHeight-100&&r.height<innerHeight-180)note.scrollIntoView({block:'nearest',behavior:reducedMotion()?'auto':'smooth'});});}
   }
+
   function savedPage() {
     let body='';
     if(savedTab==='works'){const works=state.favorites.map(workById).filter(Boolean);body=works.length?'<div class="work-grid">'+works.map(tile).join('')+'</div>':emptySaved('还没有收藏的作品。','遇见喜欢的文字，轻点心形就能留下。');}
     if(savedTab==='quotes'){body=state.quotes.length?state.quotes.map(q=>{const w=workById(q.workId);return '<article class="quote-card"><blockquote>'+esc(q.text)+'</blockquote><p class="source">'+esc(q.author)+' · '+esc(q.title)+'</p><div class="row">'+(w?'<a class="btn small" href="#work/'+esc(w.id)+'">回到原作</a><button class="btn small" data-action="share-saved-quote" data-id="'+esc(q.id)+'">生成分享卡</button>':'')+'<button class="text-btn" data-action="remove-quote" data-id="'+esc(q.id)+'">移出收藏</button></div></article>';}).join(''):emptySaved('有些句子，值得留在身边。','打开作品，轻点喜欢的那一句。');}
-    if(savedTab==='records'){body=state.records.length?state.records.slice().reverse().map(r=>'<article class="quote-card"><p class="eyebrow">'+esc(r.date||'阅读留念')+'</p><blockquote>'+esc(r.text)+'</blockquote><p class="source">'+esc(r.author)+' · '+esc(r.title)+'</p>'+(r.note?'<p class="note">'+esc(r.note)+'</p>':'')+'<div class="row"><button class="btn small" data-action="edit-record" data-id="'+esc(r.id)+'">编辑 / 再次制卡</button><button class="text-btn" data-action="delete-record" data-id="'+esc(r.id)+'">删除记录</button></div></article>').join(''):emptySaved('给某一天，留一页诗意。','制卡时勾选“同时记下这次阅读”，就能在这里重温。');}
-    return '<p class="eyebrow">文字有归处 · 喜欢有回声</p><h1 class="page-title">把喜欢的，留在身边。</h1><p class="page-intro">不赶路的时候，回来读读。</p><div class="collection-tabs" aria-label="收藏类型">'+[['works','作品'],['quotes','句子'],['records','阅读留念']].map(([id,label])=>'<button class="filter-chip '+(id===savedTab?'selected':'')+'" data-action="saved-tab" data-id="'+id+'" aria-pressed="'+(id===savedTab)+'">'+label+'</button>').join('')+'</div>'+body;
+    if(savedTab==='records'){body=state.records.length?state.records.slice().reverse().map(r=>'<article class="quote-card"><p class="eyebrow">'+esc(r.date||'阅读留念')+'</p><blockquote>'+esc(r.text)+'</blockquote><p class="source">'+esc(r.author)+' · '+esc(r.title)+'</p>'+(r.note?'<p class="note">'+esc(r.note)+'</p>':'')+'<div class="row"><button class="btn small" data-action="edit-record" data-id="'+esc(r.id)+'">编辑 / 再次制卡</button><button class="text-btn" data-action="delete-record" data-id="'+esc(r.id)+'">删除记录</button></div></article>').join(''):emptySaved('给某一天，留一页诗意。','制卡时勾选“同时留在我的诗卡里”，就能在这里重温。');}
+    return '<p class="eyebrow">文字有归处 · 喜欢有回声</p><h1 class="page-title">把喜欢的，留在身边。</h1><p class="page-intro">不赶路的时候，回来读读。</p><div class="collection-tabs" aria-label="收藏类型">'+[['works','作品'],['quotes','句子'],['records','诗卡']].map(([id,label])=>'<button class="filter-chip '+(id===savedTab?'selected':'')+'" data-action="saved-tab" data-id="'+id+'" aria-pressed="'+(id===savedTab)+'">'+label+'</button>').join('')+'</div>'+body+'<div class="collection-settings"><h2>整理这本小集</h2><div class="row"><button class="btn" data-action="settings">'+icon('sliders')+' 阅读与内容设置</button><button class="btn" data-action="backup-settings">'+icon('download')+' 备份与迁移</button></div></div>';
   }
-  function emptySaved(title,text) { return '<div class="empty"><h2>'+title+'</h2><p>'+text+'</p><a class="btn" href="#explore">去寻一篇 '+icon('arrow')+'</a></div>'; }
+  function emptySaved(title,text) { return '<div class="empty"><h2>'+title+'</h2><p>'+text+'</p><a class="btn" href="#explore">去发现一篇 '+icon('arrow')+'</a></div>'; }
   function rememberView() {
     if(!previousRoute)return;
     positions.set(previousRoute,modalLocked?modalScroll:window.scrollY);
     const id=previousRoute.startsWith('#work/')?decodeURIComponent(previousRoute.slice(6)):'';
     if(id)expanded.set(id,$$('.content-module[open]').map(d=>d.dataset.module));
-    if($('#more-filters'))filterPanels.set(previousRoute,$('#more-filters').open);
   }
   function renderRoute(animate=true) {
-    clearTimeout(searchTimer);
-    const hash=location.hash||'#home';
-    rememberView();
+    clearTimeout(searchTimer);clearTimeout(shareTimer);
+    const hash=location.hash||'#home';rememberView();
     const [route,query='']=hash.slice(1).split('?'),params=new URLSearchParams(query);
-    if(!route.startsWith('work/'))lastListing=hash;
-    let html='';
+    if(['home','explore','saved'].includes(route))lastListing=hash;
+    let html='',work=null;
     if(route==='explore'){
-      explore={search:params.get('q')||'',tags:params.getAll('tag').filter(tagById),author:params.get('author')||'',form:params.get('form')||'',stage:params.get('stage')||'',topic:params.get('topic')||''};
+      explore={search:params.get('q')||'',tags:params.getAll('tag').filter(tagById),author:params.get('author')||'',form:params.get('form')||'',stage:params.get('stage')||'',topic:params.get('topic')||'',view:params.get('view')==='feeling'?'feeling':'landscape'};
       html=explorePage();
     }else if(route==='saved')html=savedPage();
-    else if(route.startsWith('work/')){const w=workById(decodeURIComponent(route.slice(5)));if(w){state.lastWork=w.id;currentHome=w.id;persist();html=detail(w);}else html=emptySaved('这篇作品暂时不在小集中。','可以回到寻篇，看看其他作品。');}
-    else html=home();
+    else if(route.startsWith('work/')){
+      work=workById(decodeURIComponent(route.slice(5)));
+      if(work){state.lastWork=work.id;currentHome=work.id;persist();html=detail(work);}else html=emptySaved('这篇作品暂时不在小集中。','可以回到发现，看看其他作品。');
+    }else if(route.startsWith('card/')){
+      const id=decodeURIComponent(route.slice(5));
+      if(!share||share.workId!==id){share=createShare(id);shareTool='';shareReturn=workById(id)?'#work/'+id:'#home';}
+      html=share?sharePage():emptySaved('暂时找不到这篇作品。','回到发现，选一篇喜欢的文字吧。');
+    }else html=home();
+    document.body.dataset.page=route.startsWith('card/')?'card':route.startsWith('work/')?'work':route;
+    document.body.dataset.longReading=String(!!work&&(work.form.includes('古文')||work.lines.length>8));
     $('#app').innerHTML='<div'+(animate?' class="fade-in"':'')+'>'+html+'</div>';
-    if($('#more-filters'))$('#more-filters').open=filterPanels.get(hash)||false;
-    const section=route.startsWith('work/')?lastListing.slice(1).split('?')[0]:route;
+    const section=route.startsWith('work/')||route.startsWith('card/')?lastListing.slice(1).split('?')[0]:route;
     $$('[data-nav]').forEach(a=>{const active=a.dataset.nav===(['explore','saved'].includes(section)?section:'home');a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
-    const work=route.startsWith('work/')?workById(decodeURIComponent(route.slice(5))):null;
-    document.title=work?work.title+' · 山月':'山月 · 在字里行间，遇见天地';
-    previousRoute=hash;
-    const version=++routeVersion,wantsSearch=focusSearch;focusSearch=false;
-    requestAnimationFrame(()=>{if(version!==routeVersion||dialog.open)return;window.scrollTo({top:wantsSearch?0:positions.get(hash)||0,behavior:'auto'});if(!dialog.open){const target=wantsSearch?$('#search'):$('#main');if(target)target.focus({preventScroll:true});}});
+    document.title=work?work.title+' · 山月':route.startsWith('card/')?'制作诗卡 · 山月':'山月 · 在字里行间，遇见天地';
+    if(route.startsWith('card/')&&share){renderShare();renderTemplatePreviews();}
+    previousRoute=hash;const version=++routeVersion,wantsSearch=focusSearch;focusSearch=false;
+    if(!dialog.open)window.scrollTo({top:wantsSearch?0:positions.get(hash)||0,behavior:'auto'});
+    requestAnimationFrame(()=>{
+      if(version===routeVersion&&!dialog.open){const target=wantsSearch?$('#search'):$('#main');if(target)target.focus({preventScroll:true});}
+    });
   }
+  function navigateRoute() {
+    const token=++navigationVersion;if(routeTransition)routeTransition.skipTransition();
+    if(dialog.open)closeModal();
+    const update=()=>token===navigationVersion?renderRoute(false):undefined;
+    if(document.startViewTransition&&!reducedMotion()){
+      routeTransition=document.startViewTransition(update);
+      // A newer route may intentionally skip the previous visual transition.
+      routeTransition.ready.catch(()=>{});routeTransition.finished.catch(()=>{});
+    }else renderRoute(!reducedMotion());
+  }
+
   function refreshPage() { renderRoute(false); }
   function openModal(title,body,small=false) {
     const opening=!dialog.open;
@@ -198,7 +260,8 @@
     modalLocked=false;
     document.body.style.position='';document.body.style.top='';document.body.style.width='';
     window.scrollTo({top:modalScroll,behavior:'auto'});
-    clearTimeout(shareTimer);shareKey='';share=null;pendingImport=null;
+    pendingImport=null;
+    dialog.innerHTML='';
     if(returnFocus&&returnFocus.isConnected)returnFocus.focus({preventScroll:true});
   }
   function closeModal() { dialog.close();finishModal(); }
@@ -206,19 +269,28 @@
   dialog.addEventListener('cancel',event=>{event.preventDefault();closeModal();});
   dialog.addEventListener('click',event=>{if(event.target===dialog){const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)closeModal();}});
 
-  function openShare(workId,lineIndex=null,record=null,quote=null) {
-    const w=workById(workId);if(!w&&!record&&!quote){toast('暂时找不到这篇作品。');return;}
+  function createShare(workId,lineIndex=null,record=null,quote=null) {
+    const w=workById(workId);if(!w&&!record&&!quote)return null;
     const a=w?authorOf(w):{};
-    share={workId,recordId:record?record.id:null,title:record?record.title:quote?quote.title:w.title,author:record?record.author:quote?quote.author:a.name,dynasty:record?record.dynasty:quote?(quote.dynasty||a.dynasty||''):a.dynasty,lines:record?record.lines.slice():quote?[quote.text]:w.lines.slice(),picked:record?record.picked.slice():quote?[0]:lineIndex!==null?[lineIndex]:w.quote.slice(),intro:record?record.intro:quote?'':w.intro,excerpt:record?!!record.excerpt:!!quote,theme:record?record.theme:'paper',ratio:record?record.ratio:'portrait',mode:record?record.mode:'quote',date:record?record.date:localDate(),showDate:record?record.showDate:false,note:record?record.note:'',signature:record?record.signature:'',showIntro:record?record.showIntro:false,keepRecord:!!record,dataUrl:null};
-    openModal('把诗意，留成一张卡片','<div class="share-layout"><div class="share-preview"><img id="share-image" alt="分享卡图片预览"><p class="preview-caption">预览即导出效果 · 可保存高清图片</p><p id="share-error" class="error" role="alert" hidden></p></div><div class="share-controls"><div class="field"><span>卡片内容</span><div class="segmented">'+[['quote','摘句'],['whole','作品'],['memory','阅读留念']].map(([id,label])=>'<button data-action="share-mode" data-id="'+id+'" class="'+(share.mode===id?'active':'')+'">'+label+'</button>').join('')+'</div></div><div id="quote-picks" class="quote-select" '+(share.mode==='whole'?'hidden':'')+'>'+share.lines.map((line,i)=>'<label class="check"><input type="checkbox" data-quote-index="'+i+'" '+(share.picked.includes(i)?'checked':'')+'><span>'+esc(line)+'</span></label>').join('')+'</div><div class="field"><span>纸上的风景</span><div class="segmented">'+[['paper','素笺','#eee8d8'],['night','月夜','#253d3d'],['botanic','草木','#c3d3ad']].map(([id,label,color])=>'<button data-action="share-theme" data-id="'+id+'" class="'+(share.theme===id?'active':'')+'"><i class="theme-swatch" style="background:'+color+'"></i>'+label+'</button>').join('')+'</div></div><div class="field"><span>画幅</span><div class="segmented">'+[['portrait','竖版 3:4'],['square','方形 1:1']].map(([id,label])=>'<button data-action="share-ratio" data-id="'+id+'" class="'+(share.ratio===id?'active':'')+'">'+label+'</button>').join('')+'</div></div><label class="field"><span>写下一句感受 <small>（可选，最多 80 字）</small></span><textarea id="share-note" maxlength="80" placeholder="今天，这一句让我想到……">'+esc(share.note)+'</textarea></label><div class="row"><label class="field" style="flex:1;min-width:110px"><span>署名（可选）</span><input id="share-signature" maxlength="18" value="'+esc(share.signature)+'" placeholder="留个名字"></label><label class="field" style="flex:1;min-width:125px"><span>日期</span><input id="share-date" type="date" value="'+esc(share.date)+'"></label></div><label class="check"><input id="share-show-date" type="checkbox" '+(share.showDate?'checked':'')+'>在卡片上显示日期</label><label class="check"><input id="share-intro" type="checkbox" '+(share.showIntro?'checked':'')+'>附上一句赏读</label><label class="check"><input id="share-record" type="checkbox" '+(share.keepRecord?'checked':'')+'>同时记下这次阅读，留在收藏里</label><button class="btn primary save-image" data-action="download-image">'+icon('download')+' 保存高清图片</button><p class="help">保存后可自行分享朋友圈。手机若未直接下载，可长按上方图片保存。图片在本地生成。</p></div></div>');
-    dialog.classList.add('share-dialog');shareKey='';
-    $$('.segmented button',dialog).forEach(b=>b.setAttribute('aria-pressed',String(b.classList.contains('active'))));
-    const footer=document.createElement('footer');footer.className='modal-footer';
-    footer.innerHTML='<p><span id="share-size">1080 × 1440</span><small>PNG · 留一页诗意</small></p>';
-    footer.appendChild($('[data-action="download-image"]',dialog));dialog.appendChild(footer);
-    renderShare();
-    if(document.fonts)document.fonts.ready.then(()=>{if(share){shareKey='';renderShare();}});
+    return {workId,recordId:record?record.id:null,title:record?record.title:quote?quote.title:w.title,author:record?record.author:quote?quote.author:a.name,dynasty:record?record.dynasty:quote?(quote.dynasty||a.dynasty||''):a.dynasty,lines:record?record.lines.slice():quote?[quote.text]:w.lines.slice(),picked:record?record.picked.slice():quote?[0]:lineIndex!==null?[lineIndex]:w.quote.slice(),intro:record?record.intro:quote?'':w.intro,excerpt:record?!!record.excerpt:!!quote,theme:record?record.theme:'paper',ratio:record?record.ratio:'portrait',mode:record?record.mode:'quote',date:record?record.date:localDate(),showDate:record?record.showDate:false,note:record?record.note:'',signature:record?record.signature:'',showIntro:record?record.showIntro:false,keepRecord:!!record,dataUrl:null};
   }
+  function openShare(workId,lineIndex=null,record=null,quote=null) {
+    const next=createShare(workId,lineIndex,record,quote);if(!next){toast('暂时找不到这篇作品。');return;}
+    shareReturn=location.hash||'#home';share=next;shareKey='';shareTool='';
+    location.hash='#card/'+encodeURIComponent(workId);
+  }
+  function sharePage() {
+    const buttons=(kind,items)=>'<div class="segmented">'+items.map(([id,label])=>'<button data-action="share-'+kind+'" data-id="'+id+'" aria-pressed="'+(share[kind]===id)+'" class="'+(share[kind]===id?'active':'')+'">'+label+'</button>').join('')+'</div>';
+    return '<section class="maker-page"><header class="maker-header"><a class="text-btn maker-back" href="'+esc(shareReturn)+'">'+icon('back')+' 返回'+(shareReturn.startsWith('#saved')?'收藏':shareReturn.startsWith('#work/')?'原文':'遇见')+'</a><h1>制作诗卡</h1><span>把喜欢的文字，留在身边</span></header><div class="share-layout"><div class="share-preview"><button class="preview-zoom" data-action="zoom-card" aria-label="放大查看诗卡"><img id="share-image" alt="分享卡图片预览"></button><p class="preview-caption">轻点放大 · 手机可长按图片保存</p><div id="share-error" class="error" role="alert" hidden></div><button class="btn small" id="adjust-quotes" data-action="share-tool" data-id="quote" hidden>调整选句</button></div><div class="share-controls"><p class="eyebrow">给这句诗，留个模样</p><div class="template-grid">'+[['paper','素笺','留白与印记'],['night','月夜','月光里的诗'],['botanic','草木','一页自然']].map(([id,label,note])=>'<button class="template-choice '+(share.theme===id?'active':'')+'" data-action="share-theme" data-id="'+id+'" aria-pressed="'+(share.theme===id)+'"><span class="template-image"><img data-template-preview="'+id+'" alt="'+label+'模板缩略图"></span><strong>'+label+'</strong><small>'+note+'</small></button>').join('')+'</div><div class="maker-tools" aria-label="诗卡编辑工具">'+[['quote','选句','book'],['note','文字','pen'],['sign','落款','stamp'],['layout','画幅','frame']].map(([id,label,ico])=>'<button data-action="share-tool" data-id="'+id+'" aria-expanded="'+(shareTool===id)+'" aria-controls="panel-'+id+'">'+icon(ico)+label+'</button>').join('')+'</div><section class="maker-panel" id="panel-quote" '+(shareTool==='quote'?'':'hidden')+'><h2>选几句喜欢的文字</h2>'+buttons('mode',[['quote','摘句'],['whole','整篇'],['memory','阅读留念']])+'<div id="quote-picks" class="quote-select" '+(share.mode==='whole'?'hidden':'')+'>'+share.lines.map((line,i)=>'<label class="check"><input type="checkbox" data-quote-index="'+i+'" '+(share.picked.includes(i)?'checked':'')+'><span>'+esc(line)+'</span></label>').join('')+'</div><p class="help" id="share-selection-count" role="status"></p><button class="text-btn" data-action="share-tool" data-id="quote">收起选句 '+icon('check')+'</button></section><section class="maker-panel" id="panel-note" '+(shareTool==='note'?'':'hidden')+'><label class="field"><span>写下一句感受 <small>（可选，最多 80 字）</small></span><textarea id="share-note" maxlength="80" placeholder="今天，这一句让我想到……">'+esc(share.note)+'</textarea></label><label class="check"><input id="share-intro" type="checkbox" '+(share.showIntro?'checked':'')+'>附上一句赏读</label></section><section class="maker-panel" id="panel-sign" '+(shareTool==='sign'?'':'hidden')+'><div class="row"><label class="field"><span>署名（可选）</span><input id="share-signature" maxlength="18" value="'+esc(share.signature)+'" placeholder="留个名字"></label><label class="field"><span>日期</span><input id="share-date" type="date" value="'+esc(share.date)+'"></label></div><label class="check"><input id="share-show-date" type="checkbox" '+(share.showDate?'checked':'')+'>在卡片上显示日期</label></section><section class="maker-panel" id="panel-layout" '+(shareTool==='layout'?'':'hidden')+'><h2>选择画幅</h2>'+buttons('ratio',[['portrait','竖版 3:4'],['square','方形 1:1']])+'</section><label class="check keep-record"><input id="share-record" type="checkbox" '+(share.keepRecord?'checked':'')+'>同时留在我的诗卡里</label><p class="help">保存后可自行分享朋友圈。图片在本机生成，感受与落款不会上传。</p></div></div><footer class="maker-footer"><p><span id="share-size">1080 × 1440</span><small>PNG · 留一页诗意</small></p><button class="btn primary save-image" data-action="download-image">'+icon('download')+' 保存高清图片</button></footer></section>';
+  }
+  function setShareTool(id,forceOpen=false) {
+    shareTool=shareTool===id&&!forceOpen?'':id;
+    $$('.maker-panel').forEach(panel=>panel.hidden=panel.id!=='panel-'+shareTool);
+    $$('[data-action="share-tool"]').forEach(b=>b.setAttribute('aria-expanded',String(b.dataset.id===shareTool)));
+    if(shareTool&&!reducedMotion())$('#panel-'+shareTool).animate([{opacity:0,transform:'translateY(-6px)'},{opacity:1,transform:'none'}],{duration:200,easing:'ease-out'});
+    if(shareTool)requestAnimationFrame(()=>{const panel=$('#panel-'+shareTool);if(panel)panel.scrollIntoView({block:'nearest',behavior:reducedMotion()?'auto':'smooth'});});
+  }
+
   function wrapCanvas(ctx,text,maxWidth) {
     const chars=Array.from(text);const lines=[];let current='';
     const noStart=/^[，。！？；：、）》」』】…,.!?;:]/;
@@ -226,52 +298,70 @@
     if(current)lines.push(current);return lines;
   }
   function scheduleShare() {clearTimeout(shareTimer);shareTimer=setTimeout(renderShare,140);}
+  function composeShare(card,scale=1) {
+    const chosen=card.mode==='whole'?card.lines:card.lines.filter((_,i)=>card.picked.includes(i));
+    if(!chosen.length)return {error:'先选一句喜欢的文字，再生成卡片。'};
+    const W=1080,H=card.ratio==='square'?1080:1440,canvas=document.createElement('canvas');canvas.width=Math.round(W*scale);canvas.height=Math.round(H*scale);
+    const ctx=canvas.getContext('2d');if(!ctx)return {error:'这个浏览器暂时不能生成图片，请换一个浏览器打开。'};ctx.scale(scale,scale);
+    const colors={paper:{bg:'#f6f0e3',ink:'#30473c',muted:'#62725f',accent:'#a65b3f',art:'#d2d4bd'},night:{bg:'#203f38',ink:'#f7eedc',muted:'#c1d1c0',accent:'#dac28d',art:'#638975'},botanic:{bg:'#e8eddd',ink:'#2d513a',muted:'#5c7655',accent:'#9c6344',art:'#a9bf94'}}[card.theme];
+    const serif='"Songti SC", "STSong", "SimSun", serif',sans='"Microsoft YaHei", sans-serif';
+    ctx.fillStyle=colors.bg;ctx.fillRect(0,0,W,H);
+    if(card.theme==='paper'){
+      ctx.strokeStyle='#c9c8b4';ctx.lineWidth=1;ctx.strokeRect(42,42,W-84,H-84);
+      ctx.fillStyle=colors.accent;ctx.fillRect(96,85,34,3);ctx.fillRect(96,85,3,34);
+    }else if(card.theme==='night'){
+      ctx.fillStyle='#e5d5a9';ctx.beginPath();ctx.arc(934,117,39,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='#678a79';ctx.globalAlpha=.35;ctx.lineWidth=2;
+      for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(780,H-190+i*34,300+i*75,38,0,Math.PI,Math.PI*2);ctx.stroke();}ctx.globalAlpha=1;
+    }else{
+      ctx.save();ctx.strokeStyle=colors.muted;ctx.fillStyle=colors.art;ctx.globalAlpha=.55;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(1010,H-50);ctx.quadraticCurveTo(948,H-300,900,H-460);ctx.stroke();
+      for(let i=0;i<6;i++){const x=987-i*16,y=H-116-i*55;ctx.beginPath();ctx.ellipse(x+(i%2?17:-24),y,43,13,i%2?-.9:.7,0,Math.PI*2);ctx.fill();}ctx.restore();
+      ctx.fillStyle=colors.muted;ctx.fillRect(96,88,80,2);
+    }
+    ctx.fillStyle=colors.muted;ctx.font='22px '+sans;ctx.fillText(card.mode==='memory'?'一日一笺 · 阅读留念':'山月 · '+(card.mode==='whole'?'一篇文字':'一瞬诗意'),96,140);
+    ctx.fillStyle=colors.ink;ctx.font='48px '+serif;
+    const titleLines=wrapCanvas(ctx,card.title,770);titleLines.forEach((line,i)=>ctx.fillText(line,96,218+i*65));
+    const bylineY=218+(titleLines.length-1)*65+52;
+    ctx.font='25px '+sans;ctx.fillStyle=colors.muted;
+    const excerpt=card.excerpt||(card.mode!=='whole'&&chosen.length<card.lines.length);
+    ctx.fillText(card.dynasty+' · '+card.author+(excerpt?'  /  节选':''),96,bylineY);
+    const extras=[];ctx.font='29px '+serif;
+    if(card.showIntro&&card.intro)extras.push({label:'赏读',lines:wrapCanvas(ctx,card.intro,850)});
+    if(card.note.trim())extras.push({label:'随记',lines:wrapCanvas(ctx,card.note.trim(),850)});
+    const extraHeight=extras.reduce((n,e)=>n+42+e.lines.length*47+25,0);
+    const top=bylineY+62,bottom=H-150-extraHeight-25,available=bottom-top;
+    let size=chosen.join('').length<45?76:64,rendered=[];
+    while(size>=46){ctx.font=size+'px '+serif;rendered=chosen.flatMap(line=>wrapCanvas(ctx,line,850));if(rendered.length*size*1.6<=available)break;size-=2;}
+    if(size<46)return {error:'这段文字有些长。请减少选句或感想，或换成竖版，让每个字都清楚。'};
+    const leading=size*1.6,total=rendered.length*leading;let y=top+Math.max(0,(available-total)/2)+size;
+    ctx.fillStyle=colors.ink;ctx.font=size+'px '+serif;ctx.textAlign=card.theme==='night'?'center':'left';
+    rendered.forEach(line=>{ctx.fillText(line,card.theme==='night'?W/2:110,y);y+=leading;});ctx.textAlign='left';
+    if(extras.length){y=H-150-extraHeight;ctx.strokeStyle=colors.muted;ctx.globalAlpha=.35;ctx.beginPath();ctx.moveTo(96,y-23);ctx.lineTo(186,y-23);ctx.stroke();ctx.globalAlpha=1;extras.forEach(extra=>{ctx.fillStyle=colors.accent;ctx.font='20px '+sans;ctx.fillText(extra.label,96,y+17);y+=42;ctx.fillStyle=colors.ink;ctx.font='29px '+serif;extra.lines.forEach(line=>{ctx.fillText(line,96,y+25);y+=47;});y+=25;});}
+    ctx.strokeStyle=colors.accent;ctx.lineWidth=1.5;ctx.strokeRect(96,H-105,54,42);ctx.font='20px '+serif;ctx.fillStyle=colors.accent;ctx.fillText('山月',103,H-77);
+    ctx.font='22px '+sans;ctx.fillStyle=colors.muted;
+    if(card.showDate&&card.date)ctx.fillText(card.date.replace(/-/g,' . '),174,H-78);
+    if(card.signature.trim()){ctx.textAlign='right';ctx.fillText(card.signature.trim(),W-96,H-78);}
+    try{return {dataUrl:canvas.toDataURL('image/png')};}catch(error){return {error:'图片生成失败，请重试或切换样式。'};}
+  }
   function renderShare() {
-    clearTimeout(shareTimer);
-    if(!share||!$('#share-image'))return;
+    clearTimeout(shareTimer);if(!share||!$('#share-image'))return;
     const img=$('#share-image'),error=$('#share-error'),save=$('[data-action="download-image"]');
     const chosen=share.mode==='whole'?share.lines:share.lines.filter((_,i)=>share.picked.includes(i));
     const key=JSON.stringify([share.title,share.author,share.dynasty,chosen,share.theme,share.ratio,share.mode,share.excerpt,share.showIntro?share.intro:'',share.note,share.signature,share.showDate?share.date:'']);
     $('#share-size').textContent=share.ratio==='square'?'1080 × 1080':'1080 × 1440';
-    if(key===shareKey&&share.dataUrl)return;
-    const fail=message=>{share.dataUrl=null;img.hidden=true;img.removeAttribute('src');error.hidden=false;error.textContent=message;save.disabled=true;};
-    if(!chosen.length){fail('先选一句喜欢的文字，再生成卡片。');return;}
-    const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=share.ratio==='square'?1080:1440;
-    const ctx=canvas.getContext('2d');if(!ctx){fail('这个浏览器暂时不能生成图片，请换一个浏览器打开。');return;}
-    const W=canvas.width,H=canvas.height;
-    const colors={paper:{bg:'#f7f3e9',ink:'#344a3b',muted:'#89917c',accent:'#a66c50',art:'#b9c4a8'},night:{bg:'#203b3b',ink:'#f3eedc',muted:'#b4c4b8',accent:'#dbc18d',art:'#44635c'},botanic:{bg:'#eaf0de',ink:'#385b3c',muted:'#7e9473',accent:'#a47655',art:'#aac397'}}[share.theme];
-    const serif='"Songti SC", "STSong", "SimSun", serif';
-    const sans='"Microsoft YaHei", sans-serif';
-    ctx.fillStyle=colors.bg;ctx.fillRect(0,0,W,H);
-    ctx.strokeStyle=colors.muted;ctx.globalAlpha=.23;ctx.lineWidth=1;ctx.strokeRect(42,42,W-84,H-84);ctx.globalAlpha=1;
-    ctx.save();ctx.globalAlpha=share.theme==='night'?.75:.35;ctx.fillStyle=share.theme==='night'?'#e9dfbf':colors.art;ctx.beginPath();ctx.arc(875,180,share.theme==='night'?49:63,0,Math.PI*2);ctx.fill();ctx.restore();
-    ctx.save();ctx.globalAlpha=.2;ctx.fillStyle=colors.art;ctx.beginPath();ctx.moveTo(43,H-180);ctx.bezierCurveTo(220,H-260,370,H-85,540,H-170);ctx.bezierCurveTo(720,H-275,900,H-170,W-43,H-210);ctx.lineTo(W-43,H-43);ctx.lineTo(43,H-43);ctx.fill();ctx.restore();
-    if(share.theme==='botanic'){ctx.save();ctx.strokeStyle=colors.muted;ctx.fillStyle=colors.art;ctx.globalAlpha=.45;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(903,H-65);ctx.quadraticCurveTo(917,H-260,850,H-380);ctx.stroke();for(let i=0;i<5;i++){const x=895-i*8,y=H-130-i*44;ctx.beginPath();ctx.ellipse(x+(i%2?19:-17),y,31,9,i%2?-.7:.6,0,Math.PI*2);ctx.fill();}ctx.restore();}
-    ctx.fillStyle=colors.muted;ctx.font='22px '+sans;ctx.fillText(share.mode==='memory'?'一日一笺 · 阅读留念':'字里行间 · '+(share.mode==='whole'?'一篇好文字':'一瞬诗意'),96,104);
-    ctx.fillStyle=colors.ink;ctx.font='48px '+serif;
-    const titleLines=wrapCanvas(ctx,share.title,770);titleLines.forEach((line,i)=>ctx.fillText(line,96,183+i*65));
-    const bylineY=183+(titleLines.length-1)*65+56;
-    ctx.font='25px '+sans;ctx.fillStyle=colors.muted;
-    const excerpt=share.excerpt||(share.mode!=='whole'&&chosen.length<share.lines.length);
-    ctx.fillText(share.dynasty+' · '+share.author+(excerpt?'  /  节选':''),96,bylineY);
-    const extras=[];ctx.font='29px '+serif;
-    if(share.showIntro&&share.intro)extras.push({label:'赏读',lines:wrapCanvas(ctx,share.intro,850)});
-    if(share.note.trim())extras.push({label:'随记',lines:wrapCanvas(ctx,share.note.trim(),850)});
-    const extraHeight=extras.reduce((n,e)=>n+42+e.lines.length*47+25,0);
-    const top=bylineY+80,bottom=H-145-extraHeight-30,available=bottom-top;
-    let size=chosen.join('').length<45?72:62,rendered=[];
-    while(size>=46){ctx.font=size+'px '+serif;rendered=chosen.flatMap(line=>wrapCanvas(ctx,line,850));if(rendered.length*size*1.62<=available)break;size-=2;}
-    if(size<46){fail('这段文字有些长。请减少选句或感想，或换成竖版，让每个字都清楚。');return;}
-    const leading=size*1.62,total=rendered.length*leading;let y=top+Math.max(0,(available-total)/2)+size;
-    ctx.fillStyle=colors.ink;ctx.font=size+'px '+serif;
-    rendered.forEach(line=>{ctx.fillText(line,110,y);y+=leading;});
-    if(extras.length){y=H-145-extraHeight;ctx.strokeStyle=colors.muted;ctx.globalAlpha=.35;ctx.beginPath();ctx.moveTo(96,y-23);ctx.lineTo(186,y-23);ctx.stroke();ctx.globalAlpha=1;extras.forEach(extra=>{ctx.fillStyle=colors.accent;ctx.font='20px '+sans;ctx.fillText(extra.label,96,y+17);y+=42;ctx.fillStyle=colors.ink;ctx.font='29px '+serif;extra.lines.forEach(line=>{ctx.fillText(line,96,y+25);y+=47;});y+=25;});}
-    ctx.font='22px '+sans;ctx.fillStyle=colors.muted;
-    if(share.showDate&&share.date)ctx.fillText(share.date.replace(/-/g,' . '),96,H-88);
-    if(share.signature.trim()){ctx.textAlign='right';ctx.fillText(share.signature.trim(),W-96,H-88);ctx.textAlign='left';}
-    try {share.dataUrl=canvas.toDataURL('image/png');shareKey=key;img.src=share.dataUrl;img.hidden=false;img.alt=share.title+'分享卡：'+chosen.join('');error.hidden=true;save.disabled=false;}
-    catch(error){fail('图片生成失败，请重试或切换样式。');}
+    $('#share-selection-count').textContent='已选 '+chosen.length+' 句 · '+chosen.join('').length+' 字';
+    if(key===shareKey&&share.dataUrl){img.src=share.dataUrl;return;}
+    const result=composeShare(share);
+    if(result.error){share.dataUrl=null;img.hidden=true;img.removeAttribute('src');error.hidden=false;error.textContent=result.error;save.disabled=true;$('#adjust-quotes').hidden=false;return;}
+    const changed=!!share.dataUrl;share.dataUrl=result.dataUrl;shareKey=key;img.src=result.dataUrl;img.hidden=false;img.alt=share.title+'分享卡：'+chosen.join('');error.hidden=true;save.disabled=false;$('#adjust-quotes').hidden=true;
+    if(changed&&!reducedMotion())img.animate([{opacity:.65},{opacity:1}],{duration:200});
   }
+  function renderTemplatePreviews() {
+    if(!share)return;
+    const example={...share,mode:'quote',picked:share.picked.length?share.picked.slice(0,2):[0],ratio:'portrait',note:'',signature:'',showDate:false,showIntro:false};
+    $$('[data-template-preview]').forEach(img=>{const result=composeShare({...example,theme:img.dataset.templatePreview},.2);if(result.dataUrl)img.src=result.dataUrl;});
+  }
+
   function downloadUrl(url,name) { const link=document.createElement('a');link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove(); }
   function safeName(text) {return text.replace(/[<>:"/\\|?*\x00-\x1f]/g,'-').slice(0,60);}
   function saveShareImage() {
@@ -319,7 +409,7 @@
     const copy=document.documentElement.cloneNode(true);
     copy.querySelectorAll('[data-hosted-only]').forEach(element=>element.remove());
     copy.querySelector('#app').innerHTML='';const m=copy.querySelector('#modal');m.innerHTML='';m.removeAttribute('open');m.className='';
-    copy.querySelector('#toast').textContent='';copy.querySelector('#toast').className='toast';copy.querySelector('body').removeAttribute('style');
+    copy.querySelector('#toast').textContent='';copy.querySelector('#toast').className='toast';copy.querySelector('body').removeAttribute('style');copy.querySelector('body').removeAttribute('data-page');copy.querySelector('body').classList.remove('keyboard-open');
     copy.querySelector('#library-data').textContent=JSON.stringify(library).replace(/</g,'\\u003c');
     copy.querySelector('#initial-state').textContent=JSON.stringify({fontSize:state.fontSize});
     copy.querySelector('title').textContent='山月 · 在字里行间，遇见天地';
@@ -376,7 +466,7 @@
     if(!raw||typeof raw!=='object')raw={};
     const text=(v,max=10000)=>typeof v==='string'?v.slice(0,max):'';
     const arr=v=>Array.isArray(v)?v:[];
-    const normalized={favorites:[...new Set(arr(raw.favorites).filter(x=>typeof x==='string'))].slice(0,2000),fontSize:Math.max(18,Math.min(30,Number(raw.fontSize)||23)),lastWork:text(raw.lastWork,64)||'niaomingjian',quotes:[],records:[]};
+    const normalized={favorites:[...new Set(arr(raw.favorites).filter(x=>typeof x==='string'))].slice(0,2000),fontSize:Math.max(18,Math.min(30,Number(raw.fontSize)||23)),lastWork:text(raw.lastWork,64)||'niaomingjian',hintDismissed:!!raw.hintDismissed,quotes:[],records:[]};
     normalized.quotes=arr(raw.quotes).filter(q=>q&&typeof q.text==='string'&&Number.isInteger(q.index)).slice(0,5000).map(q=>({id:text(q.id,140),workId:text(q.workId,64),index:q.index,text:text(q.text,2000),title:text(q.title,160),author:text(q.author,100),dynasty:text(q.dynasty,30)}));
     normalized.records=arr(raw.records).filter(r=>r&&Array.isArray(r.lines)&&r.lines.length&&r.lines.every(l=>typeof l==='string')&&Array.isArray(r.picked)&&r.picked.length&&r.picked.every(i=>Number.isInteger(i)&&i>=0&&i<r.lines.length)).slice(0,2000).map(r=>({id:text(r.id,80),workId:text(r.workId,64),title:text(r.title,160),author:text(r.author,100),dynasty:text(r.dynasty,30),lines:r.lines.slice(0,500).map(l=>text(l,2000)),picked:r.picked.filter(i=>i<500),text:text(r.text,20000),intro:text(r.intro,500),excerpt:!!r.excerpt,theme:['paper','night','botanic'].includes(r.theme)?r.theme:'paper',ratio:r.ratio==='square'?'square':'portrait',mode:['quote','whole','memory'].includes(r.mode)?r.mode:'quote',date:/^\d{4}-\d{2}-\d{2}$/.test(r.date)?r.date:localDate(),showDate:!!r.showDate,note:text(r.note,80),signature:text(r.signature,18),showIntro:!!r.showIntro}));
     return normalized;
@@ -388,9 +478,9 @@
     if(explore.search)params.set('q',explore.search);
     explore.tags.forEach(id=>params.append('tag',id));
     for(const key of ['author','form','stage','topic'])if(explore[key])params.set(key,explore[key]);
+    if(explore.view==='feeling')params.set('view','feeling');
     const hash='#explore'+(params.toString()?'?'+params:'');
-    const open=$('#more-filters')&&$('#more-filters').open;
-    history.replaceState(null,'',hash);previousRoute=hash;lastListing=hash;filterPanels.set(hash,open);
+    history.replaceState(null,'',hash);previousRoute=hash;lastListing=hash;
     if(defer)searchTimer=setTimeout(updateResults,100);else updateResults();
   }
   function toggleFavorite(id) {
@@ -398,7 +488,8 @@
     const has=state.favorites.includes(id);state.favorites=has?state.favorites.filter(x=>x!==id):[id,...state.favorites];persist();
     if(location.hash.startsWith('#saved'))refreshPage();
     else $$('[data-action="favorite"]').filter(b=>b.dataset.id===id).forEach(b=>{b.classList.toggle('is-saved',!has);b.classList.toggle('active',!has);b.setAttribute('aria-pressed',String(!has));b.setAttribute('aria-label',(has?'收藏':'取消收藏')+w.title);b.innerHTML=icon('heart')+(b.classList.contains('btn')?(has?'收藏':'已收藏'):'');});
-    toast(has?'已移出收藏。':'已把这篇文字留在收藏里。');
+    if(!reducedMotion())$$('[data-action="favorite"]').filter(b=>b.dataset.id===id).forEach(b=>b.animate([{transform:'scale(.94)'},{transform:'scale(1.06)'},{transform:'none'}],{duration:220}));
+    toast(has?'已移出收藏。':'已把这篇文字留在收藏里。',()=>{state.favorites=state.favorites.filter(x=>x!==id);if(has)state.favorites.unshift(id);persist();refreshPage();});
   }
   function saveQuote(id,index) {
     const w=workById(id);if(!w||!w.lines[index])return;
@@ -414,22 +505,30 @@
     try {
       switch(action){
         case 'close-modal':closeModal();break;
+        case 'undo':if(undoAction){const undo=undoAction;undoAction=null;undo();$('#toast').classList.remove('show');}break;
+        case 'filters':openFilters();break;
+        case 'explore-view':explore.view=id;$$('[data-action="explore-view"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));$('#discovery-cards').innerHTML=discoveryCards();filterChanged();break;
+        case 'backup-settings':settings();$$('.settings-group',dialog).filter(x=>x.tagName==='DETAILS')[2].open=true;break;
+        case 'dismiss-hint':state.hintDismissed=true;persist();$('.poem-hint')?.remove();break;
+        case 'read-insight':{const module=$('[data-module="reading"]');if(module){module.open=true;module.scrollIntoView({block:'start',behavior:reducedMotion()?'auto':'smooth'});}break;}
+        case 'share-tool':setShareTool(id,b.id==='adjust-quotes');break;
+        case 'zoom-card':if(share?.dataUrl){openModal('长按图片，保存这一页','<img class="full-card-preview" src="'+share.dataUrl+'" alt="'+esc(share.title)+'诗卡">',true);}break;
         case 'about':about();break;
         case 'settings':settings();break;
         case 'search':if($('#search')){$('#search').focus();$('#search').scrollIntoView({block:'center',behavior:'auto'});}else{focusSearch=true;location.hash='#explore';}break;
-        case 'shuffle':{let candidates=library.works.filter(w=>!recentHome.slice(-4).includes(w.id));if(!candidates.length)candidates=library.works;const w=candidates[Math.floor(Math.random()*candidates.length)];currentHome=w.id;state.lastWork=w.id;recentHome.push(w.id);persist();const old=$('.reading-card');if(old){const holder=document.createElement('div');holder.innerHTML=readingCard();old.replaceWith(holder.firstElementChild);$('.shuffle').focus({preventScroll:true});}break;}
+        case 'shuffle':shuffleWork();break;
         case 'favorite':toggleFavorite(id);break;
         case 'tag':location.hash='#explore?tag='+encodeURIComponent(id);break;
         case 'filter':explore.tags=explore.tags.includes(id)?explore.tags.filter(x=>x!==id):[...explore.tags,id];filterChanged();break;
         case 'clear-topic':explore.topic='';filterChanged();break;
-        case 'clear-filters':explore={search:'',tags:[],author:'',form:'',stage:'',topic:''};$('#search').value='';['author','form','stage'].forEach(key=>$('#'+key+'-filter').value='');filterChanged();break;
+        case 'clear-filters':explore={search:'',tags:[],author:'',form:'',stage:'',topic:'',view:explore.view};$('#search').value='';['author','form','stage'].forEach(key=>{const field=$('#'+key+'-filter');if(field)field.value='';});filterChanged();break;
         case 'clear-search':explore.search='';$('#search').value='';filterChanged();$('#search').focus({preventScroll:true});break;
-        case 'clear-condition':explore[id]='';$('#'+id+'-filter').value='';filterChanged();break;
+        case 'clear-condition':explore[id]='';if($('#'+id+'-filter'))$('#'+id+'-filter').value='';filterChanged();break;
         case 'line':showLine(id,Number(b.dataset.line),true);break;
         case 'close-line':{const line=$('.verse-line.picked');if(line){showLine(line.dataset.id,Number(line.dataset.line),true);line.focus({preventScroll:true});}break;}
         case 'save-quote':saveQuote(id,Number(b.dataset.line));break;
         case 'saved-tab':savedTab=id;refreshPage();break;
-        case 'remove-quote':state.quotes=state.quotes.filter(q=>q.id!==id);persist();refreshPage();toast('已移出收藏。');break;
+        case 'remove-quote':{const removed=state.quotes.find(q=>q.id===id);state.quotes=state.quotes.filter(q=>q.id!==id);persist();refreshPage();toast('已移出摘句。',()=>{if(removed&&!state.quotes.some(q=>q.id===id)){state.quotes.push(removed);persist();refreshPage();}});break;}
         case 'share':openShare(id);break;
         case 'share-line':openShare(id,Number(b.dataset.line));break;
         case 'share-saved-quote':{const q=state.quotes.find(q=>q.id===id);if(q)openShare(q.workId,null,null,q);break;}
@@ -480,7 +579,9 @@
       if(flags[el.id]){share[flags[el.id]]=el.checked;renderShare();}
     }
   });
-  window.addEventListener('hashchange',()=>{if(dialog.open)closeModal();renderRoute();});
+  window.addEventListener('hashchange',navigateRoute);
+  if(window.visualViewport){const syncKeyboard=()=>{const offset=Math.max(0,innerHeight-visualViewport.height-visualViewport.offsetTop);document.body.style.setProperty('--keyboard-offset',offset+'px');document.body.classList.toggle('keyboard-open',offset>120);};visualViewport.addEventListener('resize',syncKeyboard);visualViewport.addEventListener('scroll',syncKeyboard);}
+  if(document.fonts)document.fonts.ready.then(()=>{if($('#share-image')){shareKey='';renderShare();renderTemplatePreviews();}});
   serifSize();renderRoute();
   if(!storageAvailable)setTimeout(()=>toast('本地记录暂时无法读取，可以先阅读，并在设置中导出备份。'),500);
 

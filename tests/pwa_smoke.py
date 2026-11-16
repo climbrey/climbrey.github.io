@@ -14,6 +14,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'.tools/test_deps'))
 from playwright.sync_api import sync_playwright, expect
+from browser_helpers import open_card_panel, open_settings, close_surface
 OUT=ROOT/'test-results'
 parser=argparse.ArgumentParser()
 parser.add_argument('--root',action='store_true',help='Exercise the committed main / root release')
@@ -65,10 +66,10 @@ with sync_playwright() as p:
     with page.expect_download() as download:
         page.locator('[data-action="download-image"]').click()
     download.value.save_as(str(OUT/'pwa-offline-card.png'))
-    page.locator('[data-action="close-modal"]').click()
+    close_surface(page)
     print('PASS: offline reload, full reading and real image export',flush=True)
 
-    page.locator('[data-action="settings"]').click()
+    open_settings(page)
     page.locator('.settings-group summary').filter(has_text='导入、导出与备份').click()
     with page.expect_download() as download:
         page.locator('[data-action="export-html"]').click()
@@ -76,7 +77,7 @@ with sync_playwright() as p:
     download.value.save_as(str(single))
     html=single.read_text(encoding='utf-8')
     assert 'src="./pwa.js"' not in html and 'rel="manifest"' not in html
-    page.locator('[data-action="close-modal"]').click()
+    close_surface(page)
     print('PASS: PWA exports remain self-contained HTML files',flush=True)
 
     context.set_offline(False)

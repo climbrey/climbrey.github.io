@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / '.tools' / 'test_deps'))
 from playwright.sync_api import sync_playwright, expect
+from browser_helpers import open_card_panel, open_settings, close_surface
 
 OUT = ROOT / 'test-results'
 OUT.mkdir(exist_ok=True)
@@ -31,7 +32,9 @@ with sync_playwright() as p:
 
     page.locator('.motif[data-id="moon"]').click()
     expect(page.locator('#explore-results .work-tile')).to_have_count(6)
+    page.locator('[data-action="filters"]').click()
     page.locator('[data-action="filter"][data-id="homesick"]').click()
+    close_surface(page)
     expect(page.locator('#explore-results .work-tile')).to_have_count(2)
     page.locator('#search').fill('李白')
     expect(page.locator('#explore-results .work-tile')).to_have_count(1)
@@ -53,8 +56,11 @@ with sync_playwright() as p:
     page.locator('.detail-actions [data-action="share"]').click()
     expect(page.locator('#share-image')).to_be_visible()
     page.locator('[data-action="share-theme"][data-id="night"]').click()
+    open_card_panel(page, "quote")
     page.locator('[data-action="share-mode"][data-id="memory"]').click()
+    open_card_panel(page, "note")
     page.locator('#share-note').fill('把一轮月光，留给远方的人。')
+    open_card_panel(page, "sign")
     page.locator('#share-signature').fill('山间读者')
     page.locator('#share-record').check()
     expect(page.locator('#share-error')).not_to_be_visible()
@@ -66,6 +72,7 @@ with sync_playwright() as p:
         page.locator('[data-action="download-image"]').click()
     stored = page.evaluate('JSON.parse(localStorage.getItem("shanyue.reading.v1"))')
     assert len(stored['state']['records']) == 1, 'Repeated image downloads must not duplicate reading records'
+    open_card_panel(page, "layout")
     page.locator('[data-action="share-ratio"][data-id="square"]').click()
     expect(page.locator('#share-error')).not_to_be_visible()
     with page.expect_download() as downloaded:
@@ -74,18 +81,23 @@ with sync_playwright() as p:
     from PIL import Image
     assert Image.open(OUT / 'share-night.png').size == (1080, 1440)
     assert Image.open(OUT / 'share-square.png').size == (1080, 1080)
-    page.locator('[data-action="close-modal"]').click()
+    close_surface(page)
     passed('portrait/square PNG export, optional notes and nonduplicating reading records')
 
     page.goto(URL + '#work/shuidiaogetou')
     page.locator('.detail-actions [data-action="share"]').click()
+    open_card_panel(page, "quote")
     page.locator('[data-action="share-mode"][data-id="whole"]').click()
+    open_card_panel(page, "layout")
     page.locator('[data-action="share-ratio"][data-id="square"]').click()
     expect(page.locator('#share-error')).to_be_visible()
     expect(page.locator('[data-action="download-image"]')).to_be_disabled()
+    open_card_panel(page, "quote")
+    page.locator('#adjust-quotes').click()
+    expect(page.locator('#panel-quote')).to_be_visible()
     page.locator('[data-action="share-mode"][data-id="quote"]').click()
     expect(page.locator('[data-action="download-image"]')).to_be_enabled()
-    page.locator('[data-action="close-modal"]').click()
+    close_surface(page)
     passed('overlong full-text cards are blocked rather than silently clipped')
 
     page.goto(URL + '#saved')
@@ -96,7 +108,7 @@ with sync_playwright() as p:
     expect(page.locator('.quote-card')).to_have_count(1)
     passed('saved works, selected lines and reading memories have distinct collections')
 
-    page.locator('[data-action="settings"]').click()
+    open_settings(page)
     page.locator('.settings-group summary').filter(has_text='内容模块').click()
     page.locator('[data-module-toggle="background"]').uncheck()
     page.locator('#new-module').fill('我的一读')
@@ -105,13 +117,13 @@ with sync_playwright() as p:
     custom.locator('[data-action="module-edit"]').click()
     page.locator('#module-content').fill('一句平常的话，也可以留很久。')
     page.locator('[data-action="save-module"]').click()
-    page.locator('[data-action="close-modal"]').click()
+    close_surface(page)
     page.goto(URL + '#work/guiyuan')
     expect(page.locator('[data-module="background"]')).to_have_count(0)
     expect(page.locator('.content-module summary').filter(has_text='我的一读')).to_have_count(1)
     passed('module visibility and custom module content affect the reading page')
 
-    page.locator('[data-action="settings"]').click()
+    open_settings(page)
     page.locator('.settings-group summary').filter(has_text='分类与作品标签').click()
     page.locator('#new-tag').fill('清晨重读')
     page.locator('#new-tag-parent').select_option('feeling')
@@ -120,11 +132,11 @@ with sync_playwright() as p:
     page.locator('[data-action="work-tags"]').click()
     page.get_by_label('清晨重读', exact=True).check()
     page.locator('[data-action="save-work-tags"]').click()
-    page.locator('[data-action="close-modal"]').click()
+    close_surface(page)
     expect(page.locator('.detail-aside .tag').filter(has_text='清晨重读')).to_have_count(1)
     passed('custom nested classification and work tag assignment are functional')
 
-    page.locator('[data-action="settings"]').click()
+    open_settings(page)
     page.locator('.settings-group summary').filter(has_text='导入、导出与备份').click()
     with page.expect_download() as downloaded:
         page.locator('[data-action="export-backup"]').click()
@@ -163,8 +175,8 @@ with sync_playwright() as p:
     mobile.locator('.detail-actions [data-action="share"]').click()
     expect(mobile.locator('#share-image')).to_be_visible()
     mobile.screenshot(path=str(OUT / 'mobile-share.png'), full_page=True)
-    assert mobile.evaluate('document.querySelector("#modal").scrollWidth <= document.querySelector("#modal").clientWidth')
-    mobile.locator('[data-action="close-modal"]').click()
+    assert mobile.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    close_surface(mobile)
     mobile.set_viewport_size({'width':320,'height':740})
     mobile.goto(URL)
     mobile.screenshot(path=str(OUT / 'mobile-320.png'), full_page=True)
