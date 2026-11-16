@@ -48,3 +48,5 @@ body[data-page=card] .site-header,body[data-page=card] .mobile-nav,body[data-pag
 .maker-panel{scroll-margin-top:100px;scroll-margin-bottom:100px}::view-transition,::view-transition-group(*),::view-transition-image-pair(*),::view-transition-old(*),::view-transition-new(*){pointer-events:none}
 @media(max-width:700px){body[data-page=work][data-long-reading=true]{padding-bottom:calc(88px + env(safe-area-inset-bottom))}body[data-page=work][data-long-reading=true] .detail-actions{position:fixed;bottom:0;left:0;right:0;z-index:7;margin:0;padding:12px 20px max(12px,env(safe-area-inset-bottom));background:#f7f5eff5;backdrop-filter:blur(12px);border-top:1px solid var(--line)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}
+
+.module-body p{white-space:pre-wrap}

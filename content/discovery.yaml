@@ -1,0 +1,69 @@
+defaultWork: niaomingjian
+featuredMark: 月
+motifs:
+  - tag: moon
+    label: 月
+    hint: 一轮清光
+    icon: moon
+  - tag: rain
+    label: 雨
+    hint: 听雨片刻
+    icon: rain
+  - tag: mountain
+    label: 山
+    hint: 山中有声
+    icon: mountain
+  - tag: flower
+    label: 花
+    hint: 花开有时
+    icon: flower
+  - tag: snow
+    label: 雪
+    hint: 天地留白
+    icon: snow
+  - tag: wind
+    label: 风
+    hint: 风起有声
+    icon: wind
+landscape:
+  - tag: moon
+    label: 月
+    hint: 一轮清光
+    scene: moon
+  - tag: rain
+    label: 雨
+    hint: 听雨片刻
+    scene: rain
+  - tag: mountain
+    label: 山
+    hint: 山中有声
+    scene: mountain
+  - tag: flower
+    label: 花
+    hint: 花开有时
+    scene: flower
+  - tag: snow
+    label: 雪
+    hint: 天地留白
+    scene: snow
+  - tag: water
+    label: 水
+    hint: 循水而行
+    scene: water
+feeling:
+  - tag: quiet
+    label: 闲适
+    hint: 让心停一停
+    scene: mountain
+  - tag: homesick
+    label: 思念
+    hint: 寄给远方
+    scene: moon
+  - tag: hope
+    label: 旷达
+    hint: 天地开阔
+    scene: water
+  - tag: friendship
+    label: 友情
+    hint: 相知有回声
+    scene: flower

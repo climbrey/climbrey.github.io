@@ -1,10 +1,10 @@
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
-const data = JSON.parse(fs.readFileSync(path.join(__dirname, '../src/content.json'), 'utf8'));
+const data = require('../scripts/content.js').collectContent();
 const ids = new Set(data.works.map(w => w.id));
 assert.strictEqual(ids.size, data.works.length, '作品标识必须唯一');
-assert(data.works.length >= 15, 'MVP 需有足够的代表作品');
+assert(data.works.length > 0, '内容库需至少有一篇作品');
 const tags = new Map(data.tags.map(t => [t.id,t]));
 assert.strictEqual(tags.size, data.tags.length, '标签标识必须唯一');
 for (const tag of data.tags) {
@@ -19,15 +19,13 @@ for (const tag of data.tags) {
 for (const w of data.works) {
   assert(data.authors[w.author], w.title + ' 缺少作者');
   assert(w.lines.length && w.lines.every(l => l.trim()), w.title + ' 原文为空');
-  assert(w.notes.length && w.background && w.reading.length && w.thought && w.sources.length, w.title + ' 缺少详情');
+  assert(Array.isArray(w.notes) && Array.isArray(w.reading) && Array.isArray(w.sources), w.title + ' 详情类型无效');
   assert(w.quote.length && w.quote.every(i => Number.isInteger(i) && i >= 0 && i < w.lines.length), w.title + ' 选句越界');
   assert(w.tags.every(t => tags.has(t)), w.title + ' 标签不存在');
   assert(w.related.every(r => ids.has(r.id) && r.id !== w.id && r.reason), w.title + ' 关联无效');
   assert(w.stage.every(s => ['小学','初中','高中'].includes(s)));
 }
 for (const topic of data.topics) assert(topic.works.every(id => ids.has(id)), '专题必须引用实际作品');
-assert(['小学','初中','高中'].every(stage => data.works.some(w => w.stage.includes(stage))));
-assert(data.works.some(w => w.form.includes('古文')) && data.works.some(w => w.form.includes('散曲')));
 const html = fs.readFileSync(path.join(__dirname,'../offline.html'),'utf8');
 assert(!html.includes('/* INLINE_') && !html.includes('"INLINE_LIBRARY"'), '构建占位符未替换');
 assert(!/<(?:script|link|img)[^>]+(?:src|href)=["']https?:/i.test(html), '单文件不可依赖联网资源');

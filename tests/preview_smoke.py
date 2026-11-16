@@ -70,7 +70,7 @@ with sync_playwright() as p:
     downloaded.value.save_as(str(OUT / 'share-night.png'))
     with page.expect_download():
         page.locator('[data-action="download-image"]').click()
-    stored = page.evaluate('JSON.parse(localStorage.getItem("shanyue.reading.v1"))')
+    stored = page.evaluate('JSON.parse(localStorage.getItem("shanyue.reading.v2"))')
     assert len(stored['state']['records']) == 1, 'Repeated image downloads must not duplicate reading records'
     open_card_panel(page, "layout")
     page.locator('[data-action="share-ratio"][data-id="square"]').click()
@@ -146,13 +146,13 @@ with sync_playwright() as p:
         page.locator('[data-action="export-html"]').click()
     exported = OUT / 'exported-reading.html'
     downloaded.value.save_as(str(exported))
-    baseline = page.evaluate('localStorage.getItem("shanyue.reading.v1")')
+    baseline = page.evaluate('localStorage.getItem("shanyue.reading.v2")')
     bad = json.loads(backup.read_text(encoding='utf-8'))
     bad['library']['tags'][0]['parent'] = bad['library']['tags'][0]['id']
     (OUT / 'bad-cycle.json').write_text(json.dumps(bad, ensure_ascii=False), encoding='utf-8')
     page.locator('#import-file').set_input_files(str(OUT / 'bad-cycle.json'))
     expect(page.locator('#import-preview')).to_contain_text('循环')
-    assert page.evaluate('localStorage.getItem("shanyue.reading.v1")') == baseline
+    assert page.evaluate('localStorage.getItem("shanyue.reading.v2")') == baseline
     page.locator('#import-file').set_input_files(str(backup))
     expect(page.locator('[data-action="apply-import"]')).to_be_visible()
     page.locator('[data-action="apply-import"]').click()

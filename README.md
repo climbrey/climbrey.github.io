@@ -6,21 +6,24 @@
 
 ## 开发
 
-使用 Node.js 22，无需安装第三方构建依赖。在工程目录执行：
+使用 Node.js 22。在工程目录执行：
 
 ```sh
+npm ci
+npm run check:content
 npm run build
 npm test
 ```
 
 | 目录 | 内容 |
 | --- | --- |
-| `src/` | 作品数据、页面、样式、交互和手机功能 |
+| `content/` | 作品、作者、分类、专题及展示配置，见 [内容维护](content/README.md) |
+| `src/` | 页面、样式、交互、数据校验、个人数据兼容和手机功能 |
 | `scripts/` | 构建与打包 |
 | `tests/` | 内容和浏览器功能验证 |
 | `.github/workflows/` | 持续集成 |
 
-修改 `src/` 后重新构建。根目录 `index.html`、`offline.html`、`manifest.webmanifest`、`pwa.js`、`sw.js` 和 `icons/` 均为生成文件，应与源码一起提交。
+修改 `content/` 或 `src/` 后重新构建。根目录 `index.html`、`offline.html`、`manifest.webmanifest`、`pwa.js`、`sw.js` 和 `icons/` 均为生成文件，应与源码一起提交。YAML 解析依赖仅在构建时使用，网页运行和独立 HTML 无需联网加载依赖。
 
 ## 预览
 
@@ -40,6 +43,7 @@ python -m http.server 8767 --bind 127.0.0.1 --directory site
 python -m pip install --target .tools/test_deps playwright==1.58.0
 python tests/preview_smoke.py
 python tests/edge_cases.py
+python tests/content_updates.py
 python tests/interaction_smoke.py
 python tests/pwa_smoke.py
 python tests/pwa_smoke.py --root

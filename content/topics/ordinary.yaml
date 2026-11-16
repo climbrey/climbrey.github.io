@@ -1,0 +1,11 @@
+order: 30
+id: ordinary
+name: 寻常日子，也有诗意
+subtitle: 一场小雨，一朵初生的荷。
+scene: flower
+works:
+  - chunyu
+  - xiaochi
+  - yueke
+  - yinhu
+tag: quiet

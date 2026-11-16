@@ -18,7 +18,7 @@ with sync_playwright() as p:
     page.goto(URL+'#work/jingyesi')
     page.locator('.verse-line').nth(1).click()
     page.locator('[data-action="save-quote"]').click()
-    page.evaluate('''() => {const stored=JSON.parse(localStorage.getItem('shanyue.reading.v1'));stored.library.works.find(w=>w.id==='jingyesi').lines[1]='原文更新后的测试内容。';localStorage.setItem('shanyue.reading.v1',JSON.stringify(stored));}''')
+    page.evaluate('''() => {const stored=JSON.parse(localStorage.getItem('shanyue.reading.v2'));const seed=ShanyueLibrary.validateLibrary(JSON.parse(document.querySelector('#library-data').textContent));const edited=ShanyuePersonal.apply(seed,stored.personal).library;edited.works.find(w=>w.id==='jingyesi').lines[1]='原文更新后的测试内容。';stored.personal=ShanyuePersonal.diff(seed,edited);localStorage.setItem('shanyue.reading.v2',JSON.stringify(stored));}''')
     page.goto(URL+'#saved')
     page.reload()
     page.locator('[data-action="saved-tab"][data-id="quotes"]').click()
@@ -27,10 +27,13 @@ with sync_playwright() as p:
     close_surface(page)
     print('PASS: saved quotations retain their own text when library content changes',flush=True)
 
-    data=json.loads((ROOT/'src/content.json').read_text(encoding='utf-8'))
+    data=page.evaluate("JSON.parse(document.querySelector('#library-data').textContent)")
     work=next(w for w in data['works'] if w['id']=='niaomingjian')
     payload='<img src=x onerror="window.__import_executed=true">'
     work['reading'][0]['text']=payload
+    config_payload='<img src=x onerror="window.xss=1">'
+    data['discovery']['landscape'][0]['label']=config_payload
+    data['discovery']['motifs'][0]['hint']=config_payload
     source=OUT/'text-import.json'
     source.write_text(json.dumps({'format':'shanyue','version':1,'kind':'content','library':data},ensure_ascii=False),encoding='utf-8')
     open_settings(page)
@@ -42,6 +45,14 @@ with sync_playwright() as p:
     expect(page.locator('[data-module="reading"] .module-body')).to_contain_text(payload)
     assert page.locator('[data-module="reading"] img').count()==0
     assert page.evaluate('window.__import_executed === undefined')
+    page.goto(URL+'#home')
+    expect(page.locator('.motifs')).to_contain_text(config_payload)
+    assert page.locator('.motifs img').count()==0
+    page.goto(URL+'#explore')
+    expect(page.locator('.discovery-cards')).to_contain_text(config_payload)
+    assert page.locator('.discovery-cards img').count()==0
+    assert page.evaluate('window.xss === undefined')
+    page.goto(URL+'#work/niaomingjian')
     print('PASS: imported annotation markup is displayed as text, never executed',flush=True)
 
     page.locator('.detail-actions [data-action="share"]').click()

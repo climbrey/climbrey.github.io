@@ -175,7 +175,7 @@ with sync_playwright() as p:
     png = OUT / 'immediate-share.png'
     downloaded.value.save_as(str(png))
     assert png.read_bytes() == base64.b64decode(page.locator('#share-image').get_attribute('src').split(',', 1)[1])
-    assert page.evaluate('JSON.parse(localStorage.getItem("shanyue.reading.v1")).state.records.at(-1).note') == '风来，月往。'
+    assert page.evaluate('JSON.parse(localStorage.getItem("shanyue.reading.v2")).state.records.at(-1).note') == '风来，月往。'
     close_surface(page)
     unlocked(page)
     print('PASS: save stays visible on 320/390px screens; immediate download includes the latest text with one image render', flush=True)

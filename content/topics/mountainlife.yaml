@@ -1,0 +1,11 @@
+order: 20
+id: mountainlife
+name: 把心放进山水里
+subtitle: 循着水声，往幽静处走。
+scene: mountain
+works:
+  - shanju
+  - shanzhong
+  - zhuliguan
+  - jiangxue
+tag: mountain

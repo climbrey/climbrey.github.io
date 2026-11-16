@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: '22'
       - name: Build the homepage and standalone HTML
-        run: npm run build
+        run: npm ci && npm run build
       - name: Verify content and delivery files
         run: npm test
       - name: Check committed site matches its sources

@@ -4,16 +4,32 @@
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
   const esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const clone = value => JSON.parse(JSON.stringify(value));
-  const KEY = 'shanyue.reading.v1';
-  const SEED = JSON.parse($('#library-data').textContent);
+  const KEY = 'shanyue.reading.v2';
+  const Personal = ShanyuePersonal;
+  const SEED = ShanyueLibrary.validateLibrary(JSON.parse($('#library-data').textContent));
+  const seedFingerprints = Personal.fingerprints(SEED);
+  const validateLibrary = input => ShanyueLibrary.validateLibrary(input, SEED);
   const initial = JSON.parse($('#initial-state').textContent);
   let library = clone(SEED);
-  let state = {favorites:[], quotes:[], records:[], fontSize:23, lastWork:'niaomingjian', ...initial};
-  let storageAvailable = true;
+  let state = {favorites:[], quotes:[], records:[], fontSize:23, lastWork:SEED.discovery.defaultWork||SEED.works[0].id, ...initial};
+  let storageAvailable = true, storageBlocked = false, contentNotices = [], migrated = false;
   try {
-    const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (saved) { if (saved.library) library = validateLibrary(saved.library); state = normalizeState(saved.state); }
-  } catch (error) { storageAvailable = false; }
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      if (saved.version !== 2) throw new Error('不支持的个人数据版本');
+      const result = Personal.apply(SEED, saved.personal);
+      library = result.library; state = normalizeState(saved.state);
+      contentNotices = Personal.uniqueNotices([...(saved.notices||[]), ...result.notices]);
+    } else {
+      const legacy = JSON.parse(localStorage.getItem('shanyue.reading.v1') || 'null');
+      if (legacy) {
+        const result = legacy.library ? Personal.migrate(SEED, validateLibrary(legacy.library), JSON.parse($('#legacy-content').textContent)) : {library,notices:[]};
+        library = result.library; state = normalizeState(legacy.state); contentNotices = result.notices; migrated = true;
+      }
+    }
+  } catch (error) { storageAvailable = false; storageBlocked = true; }
+  let personalContent = Personal.diff(SEED, library, seedFingerprints);
   let currentHome = library.works.some(w => w.id === state.lastWork) ? state.lastWork : library.works[0].id;
   let explore = {search:'',tags:[],author:'',form:'',stage:'',topic:''};
   let savedTab = 'works', lastListing = '#home', previousRoute = '', toastTimer;
@@ -54,8 +70,12 @@
     const el=$('#toast');undoAction=undo;el.innerHTML='<span>'+esc(message)+'</span>'+(undo?'<button data-action="undo">撤销</button>':'');el.classList.add('show');clearTimeout(toastTimer);
     toastTimer=setTimeout(()=>{el.classList.remove('show');undoAction=null;},5000);
   }
-  function persist() {
-    try { localStorage.setItem(KEY,JSON.stringify({version:1,library,state})); storageAvailable=true; return true; }
+  function persist(contentChanged=false) {
+    if(storageBlocked)return false;
+    try {
+      if(contentChanged)personalContent=Personal.diff(SEED,library,seedFingerprints);
+      localStorage.setItem(KEY,JSON.stringify({version:2,personal:personalContent,state,notices:contentNotices})); storageAvailable=true; return true;
+    }
     catch(error) { storageAvailable=false; toast('浏览器暂时无法保存，请在设置中导出备份。'); return false; }
   }
   function serifSize() { document.documentElement.style.setProperty('--reading-size',state.fontSize+'px'); }
@@ -85,9 +105,9 @@
     return '<section class="reading-card" aria-label="此刻的作品"><div class="poem-cover"><div class="hero-copy"><p class="hero-meta">此刻，遇见一篇文字'+(isLong?' · 节选':'')+'</p><h2><a href="#work/'+esc(w.id)+'">'+esc(w.title)+'</a></h2><p class="byline">'+esc(a.dynasty)+' · '+esc(a.name)+'</p><div class="hero-verse">'+lines.map(l=>'<p>'+esc(l)+'</p>').join('')+'</div></div><div class="hero-art">'+scene(w.scene,'hero')+'</div><span class="art-seal">山月</span></div><div class="hero-actions"><a class="btn primary" href="#work/'+esc(w.id)+'">'+(isLong?'阅读全文':w.form.includes('古文')?'读这篇文字':'读这首诗')+' '+icon('arrow')+'</a><button class="text-btn shuffle" data-action="shuffle">'+icon('shuffle')+' 换一篇</button></div></section>';
   }
   function home() {
-    const motifs=[['moon','月','一轮清光'],['rain','雨','听雨片刻'],['mountain','山','山中有声'],['flower','花','花开有时'],['snow','雪','天地留白'],['wind','风','风起有声']];
+    const motifs=library.discovery.motifs;
     const topic=library.topics[0];
-    return '<h1 class="sr-only">山月 · 遇见文字里的天地</h1><div class="home-stage">'+readingCard()+'<section class="home-paths"><div class="desktop-intro"><p class="eyebrow">不赶路的时候</p><h2>留一点时间，<br>给眼前的诗。</h2><p>从一轮月、一阵风，走进心里的远方。</p></div><div class="discovery-entries"><a href="#explore" class="discovery-entry"><strong>按风景找</strong><span>月色、花事、山川</span>'+icon('arrow')+'</a><a href="#explore?view=feeling" class="discovery-entry"><strong>按心情找</strong><span>思念、闲适、旷达</span>'+icon('arrow')+'</a></div>'+(topic?'<a class="editorial-link" href="#explore?topic='+encodeURIComponent(topic.id)+'"><span class="editorial-mark">月</span><span><strong>'+esc(topic.name)+'</strong><small>'+esc(topic.subtitle)+'</small></span>'+icon('arrow')+'</a>':'')+'</section></div><section><div class="section-heading"><div><p class="eyebrow">诗里的风景</p><h2>你想走近哪一处？</h2></div><a class="text-btn" href="#explore">全部线索 '+icon('arrow')+'</a></div><div class="motifs">'+motifs.filter(([id])=>tagById(id)).map(([id,name,note])=>'<button class="motif" data-action="tag" data-id="'+id+'"><span class="motif-orb">'+icon(id)+'</span><span class="motif-name">'+name+'<span class="motif-note">'+note+'</span></span></button>').join('')+'</div></section><section><div class="section-heading"><div><p class="eyebrow">一组文字，一次漫游</p><h2>走一条诗里的小径</h2></div></div><div class="topics">'+library.topics.map((t,i)=>'<a class="topic-card topic-'+i+'" href="#explore?topic='+encodeURIComponent(t.id)+'"><div class="topic-art">'+scene(t.scene,'topic'+i)+'</div><div class="topic-copy"><span class="topic-kicker">诗意小集</span><h3>'+esc(t.name)+'</h3><p>'+esc(t.subtitle)+'</p><span class="topic-arrow">'+icon('arrow')+'</span></div></a>').join('')+'</div></section><section><div class="section-heading"><h2>不妨，再读一篇</h2><a class="text-btn" href="#explore">全部作品 '+icon('arrow')+'</a></div><div class="work-grid home-recommendations">'+library.works.filter(w=>w.id!==currentHome).slice(0,3).map(tile).join('')+'</div></section>';
+    return '<h1 class="sr-only">山月 · 遇见文字里的天地</h1><div class="home-stage">'+readingCard()+'<section class="home-paths"><div class="desktop-intro"><p class="eyebrow">不赶路的时候</p><h2>留一点时间，<br>给眼前的诗。</h2><p>从一轮月、一阵风，走进心里的远方。</p></div><div class="discovery-entries"><a href="#explore" class="discovery-entry"><strong>按风景找</strong><span>月色、花事、山川</span>'+icon('arrow')+'</a><a href="#explore?view=feeling" class="discovery-entry"><strong>按心情找</strong><span>思念、闲适、旷达</span>'+icon('arrow')+'</a></div>'+(topic?'<a class="editorial-link" href="#explore?topic='+encodeURIComponent(topic.id)+'"><span class="editorial-mark">'+esc(library.discovery.featuredMark)+'</span><span><strong>'+esc(topic.name)+'</strong><small>'+esc(topic.subtitle)+'</small></span>'+icon('arrow')+'</a>':'')+'</section></div><section><div class="section-heading"><div><p class="eyebrow">诗里的风景</p><h2>你想走近哪一处？</h2></div><a class="text-btn" href="#explore">全部线索 '+icon('arrow')+'</a></div><div class="motifs">'+motifs.filter(c=>tagById(c.tag)).map(({tag:id,label:name,hint:note,icon:iconName})=>'<button class="motif" data-action="tag" data-id="'+id+'"><span class="motif-orb">'+icon(iconName)+'</span><span class="motif-name">'+esc(name)+'<span class="motif-note">'+esc(note)+'</span></span></button>').join('')+'</div></section><section><div class="section-heading"><div><p class="eyebrow">一组文字，一次漫游</p><h2>走一条诗里的小径</h2></div></div><div class="topics">'+library.topics.map((t,i)=>'<a class="topic-card topic-'+i+'" href="#explore?topic='+encodeURIComponent(t.id)+'"><div class="topic-art">'+scene(t.scene,'topic'+i)+'</div><div class="topic-copy"><span class="topic-kicker">诗意小集</span><h3>'+esc(t.name)+'</h3><p>'+esc(t.subtitle)+'</p><span class="topic-arrow">'+icon('arrow')+'</span></div></a>').join('')+'</div></section><section><div class="section-heading"><h2>不妨，再读一篇</h2><a class="text-btn" href="#explore">全部作品 '+icon('arrow')+'</a></div><div class="work-grid home-recommendations">'+library.works.filter(w=>w.id!==currentHome).slice(0,3).map(tile).join('')+'</div></section>';
   }
   async function shuffleWork() {
     const version=++shuffleVersion,route=routeVersion,old=$('.reading-card'),scroll=window.scrollY;
@@ -122,8 +142,8 @@
     return '<div class="filter-row"><span class="filter-label">'+esc(r.name)+'</span><div class="filter-options">'+members.map(t=>branch(t)).join('')+'</div></div>';
   }
   function discoveryCards() {
-    const choices=explore.view==='feeling'?[['quiet','闲适','让心停一停','mountain'],['homesick','思念','寄给远方','moon'],['hope','旷达','天地开阔','water'],['friendship','友情','相知有回声','flower']]:[['moon','月','一轮清光','moon'],['rain','雨','听雨片刻','rain'],['mountain','山','山中有声','mountain'],['flower','花','花开有时','flower'],['snow','雪','天地留白','snow'],['water','水','循水而行','water']];
-    return choices.filter(([id])=>tagById(id)).map(([id,name,note,art])=>'<button class="discovery-card" data-action="filter" data-id="'+id+'" aria-pressed="'+explore.tags.includes(id)+'"><span class="discovery-art">'+scene(art,'find-'+id)+'</span><strong>'+name+'</strong><span>'+note+'</span><span class="selection-check" aria-hidden="true">'+icon('check')+'</span></button>').join('');
+    const choices=library.discovery[explore.view==='feeling'?'feeling':'landscape'];
+    return choices.filter(c=>tagById(c.tag)).map(({tag:id,label:name,hint:note,scene:art})=>'<button class="discovery-card" data-action="filter" data-id="'+id+'" aria-pressed="'+explore.tags.includes(id)+'"><span class="discovery-art">'+scene(art,'find-'+id)+'</span><strong>'+esc(name)+'</strong><span>'+esc(note)+'</span><span class="selection-check" aria-hidden="true">'+icon('check')+'</span></button>').join('');
   }
   function explorePage() {
     const topic=library.topics.find(t=>t.id===explore.topic);
@@ -385,9 +405,22 @@
     renderShare();
   }
 
+  function contentUpdateNotice() {
+    if(!contentNotices.length)return '<p class="help">内置内容随版本更新。你的内容调整、收藏和诗卡保存在当前浏览器，可用个人备份迁移。</p>';
+    return '<div class="import-preview"><p>部分内容有新版，其中与你修改重合的部分已优先保留个人版本。</p><button class="text-btn" data-action="content-updates">查看更新说明 '+icon('arrow')+'</button></div>';
+  }
+  function showContentUpdates() {
+    const labels={background:'写作缘起',reading:'赏读',thought:'核心思想',notes:'字词解释',lines:'原文',tags:'标签',sources:'出处',label:'模块名称',enabled:'显示设置','*':'整个条目'};
+    const entries=contentNotices.map(n=>{
+      const lookup=(data)=>n.group==='authors'?data.authors[n.id]:n.group==='config'?null:data[n.group]?.find(r=>r.id===n.id);
+      const row=lookup(library)||lookup(SEED);
+      return '<li>'+esc(row?.title||row?.name||row?.label||(n.group==='config'?'内容展示配置':n.id))+' · '+esc(labels[n.field]||(n.field.startsWith('extra/')?'自定义内容':n.field))+'</li>';
+    }).join('');
+    openModal('内容更新说明','<p class="modal-subtitle">下面这些位置同时有内置更新和个人修改。目前继续使用你的版本，其他未修改内容已随版本更新。</p><ul>'+entries+'</ul><div class="row" style="margin-top:22px"><button class="btn primary" data-action="keep-content">继续使用我的内容</button><button class="btn" data-action="use-published">这些位置采用新版</button></div>',true);
+  }
   function settings() {
     const parents='<option value="">顶级分类</option>'+library.tags.map(t=>'<option value="'+esc(t.id)+'">'+esc(t.name)+'</option>').join('');
-    openModal('阅读与内容设置','<p class="modal-subtitle">按自己的喜好，整理这本小集。</p><label class="field"><span>原文字号 <output id="font-output">'+state.fontSize+' px</output></span><input id="font-size" type="range" min="18" max="30" value="'+state.fontSize+'"></label><details class="settings-group"><summary>内容模块</summary><p class="help">决定详情里显示什么，以及它们的顺序。</p><div class="manager-list">'+library.modules.map((m,i)=>'<div class="manage-row module-row"><label class="check"><input type="checkbox" data-module-toggle="'+esc(m.id)+'" '+(m.enabled?'checked':'')+'><span>'+esc(m.label)+'</span></label><button class="btn small" data-action="module-up" data-id="'+esc(m.id)+'" '+(i===0?'disabled':'')+' aria-label="上移'+esc(m.label)+'">↑</button><button class="btn small" data-action="module-edit" data-id="'+esc(m.id)+'">编辑</button><button class="btn small" data-action="module-delete" data-id="'+esc(m.id)+'">移除</button></div>').join('')+'</div><div class="manage-row"><input id="new-module" placeholder="新模块名称，如：一处地名" maxlength="24" aria-label="新模块名称"><button class="btn small" data-action="module-add">添加模块</button></div></details><details class="settings-group"><summary>分类与作品标签</summary><p class="help">分类可以分层。移除分类只解除标签，不删除作品。</p><div class="manage-row"><input id="new-tag" placeholder="新分类名称" maxlength="20" aria-label="新分类名称"><select id="new-tag-parent" aria-label="上级分类">'+parents+'</select><button class="btn small" data-action="tag-add">添加</button></div><div class="manager-list">'+library.tags.map(t=>'<div class="manage-row"><span style="flex:1;font-size:12px">'+esc(t.parent?(tagById(t.parent)||{}).name+' / ':'')+esc(t.name)+'</span><button class="btn small" data-action="tag-edit" data-id="'+esc(t.id)+'">编辑</button><button class="btn small" data-action="tag-delete" data-id="'+esc(t.id)+'">移除</button></div>').join('')+'</div><label class="field"><span>为作品调整标签</span><select id="tag-work">'+library.works.map(w=>'<option value="'+esc(w.id)+'">'+esc(w.title)+'</option>').join('')+'</select></label><button class="btn small" data-action="work-tags">编辑这篇的标签</button></details><details class="settings-group"><summary>导入、导出与备份</summary><p class="help">设置与收藏保存在当前浏览器。换设备前，可以导出一份备份。</p><div class="row" style="margin:14px 0"><button class="btn small" data-action="export-backup">导出个人备份</button><button class="btn small" data-action="export-content">导出内容包</button><button class="btn small" data-action="export-html">导出阅读 HTML</button></div><label class="field"><span>导入内容包或个人备份（JSON）</span><input id="import-file" type="file" accept="application/json,.json"></label><p class="help">内容包按作品标识合并；个人备份会恢复其中的内容、配置和收藏。导入前会显示变化预览。</p><div id="import-preview"></div></details><div class="settings-group"><button class="text-btn" data-action="about">关于这本小集 ↗</button>'+(!storageAvailable?'<p class="error">当前浏览器无法保存本地记录，请及时导出备份。</p>':'')+'</div>',true);
+    openModal('阅读与内容设置','<p class="modal-subtitle">按自己的喜好，整理这本小集。</p>'+contentUpdateNotice()+'<label class="field"><span>原文字号 <output id="font-output">'+state.fontSize+' px</output></span><input id="font-size" type="range" min="18" max="30" value="'+state.fontSize+'"></label><details class="settings-group"><summary>内容模块</summary><p class="help">决定详情里显示什么，以及它们的顺序。</p><div class="manager-list">'+library.modules.map((m,i)=>'<div class="manage-row module-row"><label class="check"><input type="checkbox" data-module-toggle="'+esc(m.id)+'" '+(m.enabled?'checked':'')+'><span>'+esc(m.label)+'</span></label><button class="btn small" data-action="module-up" data-id="'+esc(m.id)+'" '+(i===0?'disabled':'')+' aria-label="上移'+esc(m.label)+'">↑</button><button class="btn small" data-action="module-edit" data-id="'+esc(m.id)+'">编辑</button><button class="btn small" data-action="module-delete" data-id="'+esc(m.id)+'">移除</button></div>').join('')+'</div><div class="manage-row"><input id="new-module" placeholder="新模块名称，如：一处地名" maxlength="24" aria-label="新模块名称"><button class="btn small" data-action="module-add">添加模块</button></div></details><details class="settings-group"><summary>分类与作品标签</summary><p class="help">分类可以分层。移除分类只解除标签，不删除作品。</p><div class="manage-row"><input id="new-tag" placeholder="新分类名称" maxlength="20" aria-label="新分类名称"><select id="new-tag-parent" aria-label="上级分类">'+parents+'</select><button class="btn small" data-action="tag-add">添加</button></div><div class="manager-list">'+library.tags.map(t=>'<div class="manage-row"><span style="flex:1;font-size:12px">'+esc(t.parent?(tagById(t.parent)||{}).name+' / ':'')+esc(t.name)+'</span><button class="btn small" data-action="tag-edit" data-id="'+esc(t.id)+'">编辑</button><button class="btn small" data-action="tag-delete" data-id="'+esc(t.id)+'">移除</button></div>').join('')+'</div><label class="field"><span>为作品调整标签</span><select id="tag-work">'+library.works.map(w=>'<option value="'+esc(w.id)+'">'+esc(w.title)+'</option>').join('')+'</select></label><button class="btn small" data-action="work-tags">编辑这篇的标签</button></details><details class="settings-group"><summary>导入、导出与备份</summary><p class="help">设置与收藏保存在当前浏览器。换设备前，可以导出一份备份。</p><div class="row" style="margin:14px 0"><button class="btn small" data-action="export-backup">导出个人备份</button><button class="btn small" data-action="export-content">导出内容包</button><button class="btn small" data-action="export-html">导出阅读 HTML</button></div><label class="field"><span>导入内容包或个人备份（JSON）</span><input id="import-file" type="file" accept="application/json,.json"></label><p class="help">内容包按作品标识合并；个人备份会恢复其中的内容、配置和收藏。导入前会显示变化预览。</p><div id="import-preview"></div></details><div class="settings-group"><button class="text-btn" data-action="about">关于这本小集 ↗</button>'+(!storageAvailable?'<p class="error">当前浏览器无法保存本地记录，请及时导出备份。</p>':'')+'</div>',true);
   }
   function refreshSettings(section=0) { const oldY=$('.modal-body',dialog).scrollTop;settings();const details=$$('.settings-group',dialog).filter(x=>x.tagName==='DETAILS');if(details[section])details[section].open=true;$('.modal-body',dialog).scrollTop=oldY; }
   function editTag(id) {
@@ -404,7 +437,7 @@
     openModal('作品标签 · '+w.title,'<div class="filter-options">'+library.tags.map(t=>'<label class="check" style="min-width:125px"><input type="checkbox" data-work-tag="'+esc(t.id)+'" '+(w.tags.includes(t.id)?'checked':'')+'>'+esc(t.name)+'</label>').join('')+'</div><button class="btn primary" data-action="save-work-tags" data-id="'+esc(id)+'" style="margin-top:20px">保存标签</button>',true);
   }
   function confirmAction(title,text,action,id) { openModal(title,'<p style="line-height:2;margin-bottom:23px">'+esc(text)+'</p><div class="row"><button class="btn primary" data-action="'+action+'" data-id="'+esc(id)+'">确认</button><button class="btn" data-action="close-modal">取消</button></div>',true); }
-  function exportJson(kind) { const payload={format:'shanyue',version:1,kind,library,...(kind==='backup'?{state}:{}),exportedAt:new Date().toISOString()};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);downloadUrl(url,'山月-'+(kind==='backup'?'个人备份':'内容包')+'-'+localDate()+'.json');setTimeout(()=>URL.revokeObjectURL(url),20000);toast('导出文件已准备好。'); }
+  function exportJson(kind) { const payload={format:'shanyue',version:kind==='backup'?2:1,kind,library,...(kind==='backup'?{state,personal:personalContent,notices:contentNotices}:{}),exportedAt:new Date().toISOString()};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);downloadUrl(url,'山月-'+(kind==='backup'?'个人备份':'内容包')+'-'+localDate()+'.json');setTimeout(()=>URL.revokeObjectURL(url),20000);toast('导出文件已准备好。'); }
   function exportHtml() {
     const copy=document.documentElement.cloneNode(true);
     copy.querySelectorAll('[data-hosted-only]').forEach(element=>element.remove());
@@ -421,52 +454,32 @@
     try{
       if(file.size>8*1024*1024)throw new Error('文件过大，请使用 8 MB 以内的内容包。');
       const data=JSON.parse(await file.text());
-      if(data.format!=='shanyue'||data.version!==1||!['content','backup'].includes(data.kind))throw new Error('不是当前版本支持的山月内容包或备份。');
-      const incoming=validateLibrary(data.library);
+      if(data.format!=='shanyue'||![1,2].includes(data.version)||!['content','backup'].includes(data.kind)||(data.version===2&&data.kind!=='backup'))throw new Error('不是当前版本支持的山月内容包或备份。');
+      const incoming=validateLibrary({...data.library,discovery:data.library?.discovery||library.discovery});
       if(data.kind==='backup'&&(!data.state||typeof data.state!=='object'))throw new Error('备份缺少个人记录。');
       const additions=incoming.works.filter(w=>!workById(w.id)).length;
-      let merged=incoming;
+      let merged=incoming, notices=[];
+      if(data.kind==='backup'){
+        const result=data.version===2?Personal.apply(SEED,data.personal):Personal.migrate(SEED,incoming,JSON.parse($('#legacy-content').textContent));
+        merged=result.library;notices=Personal.uniqueNotices([...(data.notices||[]),...result.notices]);
+      }
       if(data.kind==='content'){
         const merge=(a,b)=>Array.from(new Map(a.concat(b).map(x=>[x.id,x])).values());
-        merged=validateLibrary({...library,authors:{...library.authors,...incoming.authors},works:merge(library.works,incoming.works),tags:merge(library.tags,incoming.tags),modules:merge(library.modules,incoming.modules),topics:merge(library.topics,incoming.topics)});
+        merged=validateLibrary({...library,discovery:incoming.discovery,authors:{...library.authors,...incoming.authors},works:merge(library.works,incoming.works),tags:merge(library.tags,incoming.tags),modules:merge(library.modules,incoming.modules),topics:merge(library.topics,incoming.topics)});
       }
-      pendingImport={library:merged,state:data.kind==='backup'?normalizeState(data.state):state,kind:data.kind};
-      area.innerHTML='<div class="import-preview"><h4>'+esc(data.kind==='backup'?'恢复个人备份':'合并内容包')+'</h4><p>'+incoming.works.length+' 篇作品；新增 '+additions+' 篇，已有标识 '+(incoming.works.length-additions)+' 篇。</p><p>'+(data.kind==='backup'?'将替换当前内容、收藏与设置。':'同标识作品、分类及模块将采用导入内容，个人收藏保留。')+'</p><div class="row" style="margin-top:13px"><button class="btn primary small" data-action="apply-import">确认导入</button><button class="btn small" data-action="cancel-import">取消</button></div></div>';
+      pendingImport={library:merged,state:data.kind==='backup'?normalizeState(data.state):state,notices,kind:data.kind};
+      area.innerHTML='<div class="import-preview"><h4>'+esc(data.kind==='backup'?'恢复个人备份':'合并内容包')+'</h4><p>'+incoming.works.length+' 篇作品；新增 '+additions+' 篇，已有标识 '+(incoming.works.length-additions)+' 篇。</p><p>'+(data.kind==='backup'?'将恢复收藏、设置与个人修改；未修改的内置内容采用当前版本。':'同标识作品、分类及模块将采用导入内容，个人收藏保留。')+'</p><div class="row" style="margin-top:13px"><button class="btn primary small" data-action="apply-import">确认导入</button><button class="btn small" data-action="cancel-import">取消</button></div></div>';
     }catch(error){pendingImport=null;area.innerHTML='<p class="error" role="alert">'+esc(error.message)+'</p>';}
   }
   function about() {
     openModal('关于这本小集','<div class="about-copy"><div class="about-brand">山月</div><p>在字里行间，遇见天地。</p><p>从一轮月、一阵风、一份心情出发，读到文字，也读到写下它的人。把喜欢的一句制成卡片，送给今天，或送给一个想起的人。</p><p class="tiny">当前为 MVP 预览，收录 '+library.works.length+' 篇代表作品。原文采用通行文本；作者与背景的存疑处保留说明，赏读为本工具编写。完整收录范围与逐版校勘将在后续完善。</p><p class="tiny">可离线阅读、制卡。收藏和设置留在当前浏览器；分享朋友圈时，请先保存图片后自行发布。</p></div>',true);
   }
 
-  function validateLibrary(input) {
-    const error=message=>{throw new Error('内容校验：'+message);};
-    const str=(v,label,max=6000)=>{if(typeof v!=='string'||v.length>max)error(label+'不是有效文本');return v;};
-    const ident=(v,label)=>{if(typeof v!=='string'||!/^[a-z][a-z0-9_-]{0,63}$/.test(v)||['constructor','prototype','__proto__'].includes(v))error(label+'标识无效');return v;};
-    const list=(v,label,max=5000)=>{if(!Array.isArray(v)||v.length>max)error(label+'不是有效列表');return v;};
-    const unique=(items,label)=>{const ids=new Set();items.forEach(x=>{if(ids.has(x.id))error(label+'标识重复：'+x.id);ids.add(x.id);});};
-    if(!input||typeof input!=='object'||input.version!==1)error('不支持的版本');
-    if(!input.authors||typeof input.authors!=='object'||Array.isArray(input.authors))error('缺少作者资料');
-    const authors={};Object.entries(input.authors).forEach(([key,a])=>{ident(key,'作者');if(!a||typeof a!=='object')error('作者资料无效');authors[key]={name:str(a.name,'作者名',100),dynasty:str(a.dynasty,'朝代',30),life:str(a.life||'','生卒年',100),bio:str(a.bio||'','作者简介')};});
-    const tags=list(input.tags,'分类',1000).map(t=>({id:ident(t.id,'分类'),name:str(t.name,'分类名称',50),parent:t.parent?ident(t.parent,'上级分类'):null}));unique(tags,'分类');
-    const tagMap=new Map(tags.map(t=>[t.id,t]));tags.forEach(t=>{const seen=new Set([t.id]);let p=t.parent;while(p){if(!tagMap.has(p))error('分类上级不存在');if(seen.has(p))error('分类存在循环');seen.add(p);p=tagMap.get(p).parent;if(seen.size>30)error('分类层级过深');}});
-    const modules=list(input.modules,'模块',50).map(m=>({id:ident(m.id,'模块'),label:str(m.label,'模块名称',50),enabled:!!m.enabled}));unique(modules,'模块');
-    const works=list(input.works,'作品',2000).map(w=>{
-      const id=ident(w.id,'作品'),author=ident(w.author,'作者');if(!Object.prototype.hasOwnProperty.call(authors,author))error('作品作者不存在：'+id);
-      const lines=list(w.lines,'原文',500).map(l=>str(l,'原文',2000));if(!lines.length||lines.some(l=>!l.trim()))error('原文不能留空');
-      const quote=list(w.quote||[0],'选句',500);if(!quote.length||quote.some(i=>!Number.isInteger(i)||i<0||i>=lines.length))error('选句位置无效：'+id);
-      const wt=list(w.tags||[],'作品标签',1000).map(t=>ident(t,'标签'));if(wt.some(t=>!tagMap.has(t)))error('作品引用了不存在的标签：'+id);
-      const extra={};if(w.extra){if(typeof w.extra!=='object'||Array.isArray(w.extra))error('自定义模块无效');Object.entries(w.extra).forEach(([k,v])=>{extra[ident(k,'模块')]=str(v,'模块内容',12000);});}
-      return {id,title:str(w.title,'篇名',160),author,form:str(w.form,'文体',60),stage:list(w.stage||[],'学段标签',3).filter(s=>['小学','初中','高中'].includes(s)),scene:['moon','mountain','water','rain','snow','bamboo','flower'].includes(w.scene)?w.scene:'mountain',tags:[...new Set(wt)],lines,quote:[...new Set(quote)],preface:str(w.preface||'','序文'),intro:str(w.intro||'','引言',500),notes:list(w.notes||[],'注释',500).map(n=>({q:str(n.q,'注释词语',200),text:str(n.text,'注释')})),background:str(w.background||'','背景',12000),reading:list(w.reading||[],'赏读',100).map(r=>({quote:str(r.quote||'','赏读引文',2000),title:str(r.title||'','赏读题名',200),text:str(r.text,'赏读内容',12000)})),thought:str(w.thought||'','思想情感',12000),sources:list(w.sources||[],'来源',100).map(s=>str(s,'来源',2000)),related:list(w.related||[],'关联作品',100).map(r=>({id:ident(r.id,'关联作品'),reason:str(r.reason,'关联理由',1000)})),extra};
-    });unique(works,'作品');if(!works.length)error('至少需要一篇作品');
-    const ids=new Set(works.map(w=>w.id));works.forEach(w=>{if(w.related.some(r=>!ids.has(r.id)))error('关联作品不存在：'+w.id);});
-    const topics=list(input.topics||[],'专题',200).map(t=>({id:ident(t.id,'专题'),name:str(t.name,'专题名称',100),subtitle:str(t.subtitle||'','专题简介',500),scene:['moon','mountain','water','rain','snow','bamboo','flower'].includes(t.scene)?t.scene:'mountain',works:list(t.works,'专题作品',2000).map(id=>ident(id,'作品')),tag:t.tag||''}));unique(topics,'专题');topics.forEach(t=>{if(t.works.some(id=>!ids.has(id)))error('专题作品不存在：'+t.id);});
-    return {version:1,name:str(input.name||'山月','内容库名称',50),authors,tags,modules,works,topics};
-  }
   function normalizeState(raw) {
     if(!raw||typeof raw!=='object')raw={};
     const text=(v,max=10000)=>typeof v==='string'?v.slice(0,max):'';
     const arr=v=>Array.isArray(v)?v:[];
-    const normalized={favorites:[...new Set(arr(raw.favorites).filter(x=>typeof x==='string'))].slice(0,2000),fontSize:Math.max(18,Math.min(30,Number(raw.fontSize)||23)),lastWork:text(raw.lastWork,64)||'niaomingjian',hintDismissed:!!raw.hintDismissed,quotes:[],records:[]};
+    const normalized={favorites:[...new Set(arr(raw.favorites).filter(x=>typeof x==='string'))].slice(0,2000),fontSize:Math.max(18,Math.min(30,Number(raw.fontSize)||23)),lastWork:text(raw.lastWork,64)||SEED.discovery.defaultWork||SEED.works[0].id,hintDismissed:!!raw.hintDismissed,quotes:[],records:[]};
     normalized.quotes=arr(raw.quotes).filter(q=>q&&typeof q.text==='string'&&Number.isInteger(q.index)).slice(0,5000).map(q=>({id:text(q.id,140),workId:text(q.workId,64),index:q.index,text:text(q.text,2000),title:text(q.title,160),author:text(q.author,100),dynasty:text(q.dynasty,30)}));
     normalized.records=arr(raw.records).filter(r=>r&&Array.isArray(r.lines)&&r.lines.length&&r.lines.every(l=>typeof l==='string')&&Array.isArray(r.picked)&&r.picked.length&&r.picked.every(i=>Number.isInteger(i)&&i>=0&&i<r.lines.length)).slice(0,2000).map(r=>({id:text(r.id,80),workId:text(r.workId,64),title:text(r.title,160),author:text(r.author,100),dynasty:text(r.dynasty,30),lines:r.lines.slice(0,500).map(l=>text(l,2000)),picked:r.picked.filter(i=>i<500),text:text(r.text,20000),intro:text(r.intro,500),excerpt:!!r.excerpt,theme:['paper','night','botanic'].includes(r.theme)?r.theme:'paper',ratio:r.ratio==='square'?'square':'portrait',mode:['quote','whole','memory'].includes(r.mode)?r.mode:'quote',date:/^\d{4}-\d{2}-\d{2}$/.test(r.date)?r.date:localDate(),showDate:!!r.showDate,note:text(r.note,80),signature:text(r.signature,18),showIntro:!!r.showIntro}));
     return normalized;
@@ -504,6 +517,10 @@
     const action=b.dataset.action,id=b.dataset.id;
     try {
       switch(action){
+        case 'content-updates':showContentUpdates();break;
+        case 'keep-content':contentNotices=[];persist();closeModal();toast('已保留你的修改。');break;
+        case 'use-published':confirmAction('采用这些内容的新版？','仅处理更新说明中的冲突字段，其他个人内容和收藏保留。新版已移除的条目也会随之移除。','confirm-published','');break;
+        case 'confirm-published':library=Personal.usePublished(SEED,library,contentNotices);contentNotices=[];persist(true);closeModal();refreshPage();toast('已采用内置新版。');break;
         case 'close-modal':closeModal();break;
         case 'undo':if(undoAction){const undo=undoAction;undoAction=null;undo();$('#toast').classList.remove('show');}break;
         case 'filters':openFilters();break;
@@ -539,24 +556,24 @@
         case 'edit-record':{const r=state.records.find(r=>r.id===id);if(r)openShare(r.workId,null,r);break;}
         case 'delete-record':confirmAction('删除这次阅读留念？','将移除这条记录，已经保存到设备的图片不受影响。','confirm-delete-record',id);break;
         case 'confirm-delete-record':state.records=state.records.filter(r=>r.id!==id);persist();closeModal();refreshPage();toast('已移除这次记录。');break;
-        case 'module-up':{const i=library.modules.findIndex(m=>m.id===id);if(i>0){[library.modules[i-1],library.modules[i]]=[library.modules[i],library.modules[i-1]];persist();refreshSettings(0);refreshPage();}break;}
-        case 'module-add':{const label=$('#new-module').value.trim();if(!label){toast('给新模块起个名字吧。');break;}library.modules.push({id:newId('module'),label,enabled:true});persist();refreshSettings(0);toast('已添加。点击“编辑”可为作品填写内容。');break;}
+        case 'module-up':{const i=library.modules.findIndex(m=>m.id===id);if(i>0){[library.modules[i-1],library.modules[i]]=[library.modules[i],library.modules[i-1]];persist(true);refreshSettings(0);refreshPage();}break;}
+        case 'module-add':{const label=$('#new-module').value.trim();if(!label){toast('给新模块起个名字吧。');break;}library.modules.push({id:newId('module'),label,enabled:true});persist(true);refreshSettings(0);toast('已添加。点击“编辑”可为作品填写内容。');break;}
         case 'module-edit':editModule(id);break;
-        case 'save-module':{const m=library.modules.find(m=>m.id===id),label=$('#edit-module-name').value.trim();if(!label){toast('模块名称不能为空。');break;}m.label=label;if($('#module-work')){const w=workById($('#module-work').value);w.extra=w.extra||{};w.extra[id]=$('#module-content').value;}persist();refreshSettings(0);refreshPage();toast('模块已保存。');break;}
+        case 'save-module':{const m=library.modules.find(m=>m.id===id),label=$('#edit-module-name').value.trim();if(!label){toast('模块名称不能为空。');break;}m.label=label;if($('#module-work')){const w=workById($('#module-work').value);w.extra=w.extra||{};w.extra[id]=$('#module-content').value;}persist(true);refreshSettings(0);refreshPage();toast('模块已保存。');break;}
         case 'module-delete':confirmAction('移除这个内容模块？','详情页将不再显示这个模块。原文和已有资料保留在内容包中，也可以先取消勾选来隐藏。','confirm-module-delete',id);break;
-        case 'confirm-module-delete':library.modules=library.modules.filter(m=>m.id!==id);persist();refreshSettings(0);refreshPage();break;
-        case 'tag-add':{const name=$('#new-tag').value.trim(),parent=$('#new-tag-parent').value||null;if(!name){toast('分类名称不能为空。');break;}if(library.tags.some(t=>t.name===name&&t.parent===parent)){toast('这个层级已有同名分类。');break;}library.tags.push({id:newId('tag'),name,parent});persist();refreshSettings(1);refreshPage();toast('分类已添加。');break;}
+        case 'confirm-module-delete':library.modules=library.modules.filter(m=>m.id!==id);persist(true);refreshSettings(0);refreshPage();break;
+        case 'tag-add':{const name=$('#new-tag').value.trim(),parent=$('#new-tag-parent').value||null;if(!name){toast('分类名称不能为空。');break;}if(library.tags.some(t=>t.name===name&&t.parent===parent)){toast('这个层级已有同名分类。');break;}library.tags.push({id:newId('tag'),name,parent});persist(true);refreshSettings(1);refreshPage();toast('分类已添加。');break;}
         case 'tag-edit':editTag(id);break;
-        case 'save-tag':{const t=tagById(id),name=$('#edit-tag-name').value.trim(),parent=$('#edit-tag-parent').value||null;if(!name){toast('分类名称不能为空。');break;}if(parent&&descendant(parent,id)){toast('不能将分类移入自己的子分类。');break;}t.name=name;t.parent=parent;persist();refreshSettings(1);refreshPage();toast('分类已保存。');break;}
+        case 'save-tag':{const t=tagById(id),name=$('#edit-tag-name').value.trim(),parent=$('#edit-tag-parent').value||null;if(!name){toast('分类名称不能为空。');break;}if(parent&&descendant(parent,id)){toast('不能将分类移入自己的子分类。');break;}t.name=name;t.parent=parent;persist(true);refreshSettings(1);refreshPage();toast('分类已保存。');break;}
         case 'tag-delete':{const count=library.works.filter(w=>w.tags.includes(id)).length;confirmAction('移除这个分类？','将解除 '+count+' 篇作品的这个标签，子分类会移到上一层，作品正文不受影响。','confirm-tag-delete',id);break;}
-        case 'confirm-tag-delete':{const t=tagById(id);library.tags.forEach(c=>{if(c.parent===id)c.parent=t.parent;});library.tags=library.tags.filter(t=>t.id!==id);library.works.forEach(w=>{w.tags=w.tags.filter(t=>t!==id);});explore.tags=explore.tags.filter(t=>t!==id);persist();refreshSettings(1);refreshPage();break;}
+        case 'confirm-tag-delete':{const t=tagById(id);library.tags.forEach(c=>{if(c.parent===id)c.parent=t.parent;});library.tags=library.tags.filter(t=>t.id!==id);library.works.forEach(w=>{w.tags=w.tags.filter(t=>t!==id);});explore.tags=explore.tags.filter(t=>t!==id);persist(true);refreshSettings(1);refreshPage();break;}
         case 'work-tags':editWorkTags($('#tag-work').value);break;
-        case 'save-work-tags':{const w=workById(id);w.tags=$$('[data-work-tag]:checked').map(x=>x.dataset.workTag);persist();refreshSettings(1);refreshPage();toast('作品标签已保存。');break;}
+        case 'save-work-tags':{const w=workById(id);w.tags=$$('[data-work-tag]:checked').map(x=>x.dataset.workTag);persist(true);refreshSettings(1);refreshPage();toast('作品标签已保存。');break;}
         case 'export-backup':exportJson('backup');break;
         case 'export-content':exportJson('content');break;
         case 'export-html':exportHtml();break;
         case 'cancel-import':pendingImport=null;$('#import-preview').innerHTML='';$('#import-file').value='';break;
-        case 'apply-import':if(pendingImport){library=pendingImport.library;state=pendingImport.state;state.favorites=state.favorites.filter(id=>workById(id));currentHome=workById(state.lastWork)?state.lastWork:library.works[0].id;explore.tags=explore.tags.filter(tagById);persist();serifSize();closeModal();previousRoute='';renderRoute();toast('导入完成。');}break;
+        case 'apply-import':if(pendingImport){library=pendingImport.library;state=pendingImport.state;contentNotices=pendingImport.kind==='backup'?pendingImport.notices:contentNotices;storageBlocked=false;state.favorites=state.favorites.filter(id=>workById(id));currentHome=workById(state.lastWork)?state.lastWork:library.works[0].id;explore.tags=explore.tags.filter(tagById);persist(true);serifSize();closeModal();previousRoute='';renderRoute();toast('导入完成。');}break;
       }
     }catch(error){toast('操作没有完成：'+error.message);console.error(error);}
   });
@@ -570,7 +587,7 @@
   document.addEventListener('change',event=>{
     const el=event.target;
     if(['author-filter','form-filter','stage-filter'].includes(el.id)){explore[el.id.split('-')[0]]=el.value;filterChanged();}
-    if(el.dataset.moduleToggle){const m=library.modules.find(m=>m.id===el.dataset.moduleToggle);m.enabled=el.checked;persist();refreshPage();}
+    if(el.dataset.moduleToggle){const m=library.modules.find(m=>m.id===el.dataset.moduleToggle);m.enabled=el.checked;persist(true);refreshPage();}
     if(el.id==='module-work'){$('#module-content').value=(workById(el.value).extra||{})[el.dataset.module]||'';}
     if(el.id==='import-file')previewImport(el.files[0]);
     if(share){
@@ -582,7 +599,8 @@
   window.addEventListener('hashchange',navigateRoute);
   if(window.visualViewport){const syncKeyboard=()=>{const offset=Math.max(0,innerHeight-visualViewport.height-visualViewport.offsetTop);document.body.style.setProperty('--keyboard-offset',offset+'px');document.body.classList.toggle('keyboard-open',offset>120);};visualViewport.addEventListener('resize',syncKeyboard);visualViewport.addEventListener('scroll',syncKeyboard);}
   if(document.fonts)document.fonts.ready.then(()=>{if($('#share-image')){shareKey='';renderShare();renderTemplatePreviews();}});
+  if(migrated)persist();
   serifSize();renderRoute();
-  if(!storageAvailable)setTimeout(()=>toast('本地记录暂时无法读取，可以先阅读，并在设置中导出备份。'),500);
+  if(!storageAvailable)setTimeout(()=>toast('本地记录暂时无法读取，原数据已保留。可在设置中导入已有备份恢复。'),500);
 
 })();
