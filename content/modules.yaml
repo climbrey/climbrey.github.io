@@ -4,6 +4,9 @@
 - id: author
   label: 认识作者
   enabled: true
+- id: places
+  label: 字里的山河
+  enabled: true
 - id: background
   label: 写作缘起
   enabled: true

@@ -280,3 +280,455 @@
 - id: graceful
   name: 婉约
   parent: style
+
+- id: geography
+  name: 古今地名
+  parent: null
+
+- id: geo_region_sichuan
+  name: 四川
+  parent: geography
+
+- id: geo_chengdu
+  name: 成都 · 锦官城、锦城
+  parent: geo_region_sichuan
+
+- id: geo_jiange
+  name: 广元剑阁 · 剑门
+  parent: geo_region_sichuan
+
+- id: geo_emei
+  name: 乐山 · 峨眉山
+  parent: geo_region_sichuan
+
+- id: geo_qianwei
+  name: 犍为 · 清溪
+  parent: geo_region_sichuan
+
+- id: geo_qingyi
+  name: 青衣江 · 平羌江
+  parent: geo_region_sichuan
+
+- id: geo_region_chongqing
+  name: 重庆
+  parent: geography
+
+- id: geo_chongqing_city
+  name: 重庆 · 渝州
+  parent: geo_region_chongqing
+
+- id: geo_fengjie
+  name: 奉节 · 白帝城、夔州
+  parent: geo_region_chongqing
+
+- id: geo_region_shaanxi
+  name: 陕西
+  parent: geography
+
+- id: geo_xian
+  name: 西安 · 长安、杜陵
+  parent: geo_region_shaanxi
+
+- id: geo_xianyang
+  name: 咸阳 · 渭城
+  parent: geo_region_shaanxi
+
+- id: geo_lantian
+  name: 蓝田 · 辋川、蓝关
+  parent: geo_region_shaanxi
+
+- id: geo_huashan
+  name: 华阴 · 华山
+  parent: geo_region_shaanxi
+
+- id: geo_tongguan
+  name: 渭南 · 潼关
+  parent: geo_region_shaanxi
+
+- id: geo_shangshan
+  name: 商洛 · 商山
+  parent: geo_region_shaanxi
+
+- id: geo_region_gansu
+  name: 甘肃
+  parent: geography
+
+- id: geo_dunhuang
+  name: 敦煌 · 阳关、玉门关
+  parent: geo_region_gansu
+
+- id: geo_tianshui
+  name: 天水 · 秦州
+  parent: geo_region_gansu
+
+- id: geo_qingni
+  name: 徽县一带 · 青泥岭
+  parent: geo_region_gansu
+
+- id: geo_region_shanxi
+  name: 山西
+  parent: geography
+
+- id: geo_yongji
+  name: 永济 · 蒲州、鹳雀楼
+  parent: geo_region_shanxi
+
+- id: geo_region_neimenggu
+  name: 内蒙古
+  parent: geography
+
+- id: geo_yinshan
+  name: 阴山 · 敕勒川
+  parent: geo_region_neimenggu
+
+- id: geo_region_beijing
+  name: 北京
+  parent: geography
+
+- id: geo_beijing_city
+  name: 北京 · 幽州、京华
+  parent: geo_region_beijing
+
+- id: geo_region_henan
+  name: 河南
+  parent: geography
+
+- id: geo_luoyang
+  name: 洛阳 · 洛城
+  parent: geo_region_henan
+
+- id: geo_kaifeng
+  name: 开封 · 汴京
+  parent: geo_region_henan
+
+- id: geo_shihao
+  name: 三门峡 · 石壕
+  parent: geo_region_henan
+
+- id: geo_heyang
+  name: 孟州一带 · 河阳
+  parent: geo_region_henan
+
+- id: geo_qishui
+  name: 鹤壁一带 · 淇水
+  parent: geo_region_henan
+
+- id: geo_region_hebei
+  name: 河北
+  parent: geography
+
+- id: geo_yecheng
+  name: 临漳一带 · 邺城
+  parent: geo_region_hebei
+
+- id: geo_region_shandong
+  name: 山东
+  parent: geography
+
+- id: geo_taishan
+  name: 泰安 · 泰山、岱宗
+  parent: geo_region_shandong
+
+- id: geo_zhucheng
+  name: 诸城 · 密州
+  parent: geo_region_shandong
+
+- id: geo_linzi
+  name: 淄博 · 临淄
+  parent: geo_region_shandong
+
+- id: geo_qufu
+  name: 曲阜 · 鲁国沂水
+  parent: geo_region_shandong
+
+- id: geo_region_hubei
+  name: 湖北
+  parent: geography
+
+- id: geo_wuhan
+  name: 武汉 · 黄鹤楼、夏口
+  parent: geo_region_hubei
+
+- id: geo_huangzhou
+  name: 黄冈 · 黄州赤壁、承天寺
+  parent: geo_region_hubei
+
+- id: geo_ezhou
+  name: 鄂州 · 古武昌
+  parent: geo_region_hubei
+
+- id: geo_jiangling
+  name: 荆州 · 江陵
+  parent: geo_region_hubei
+
+- id: geo_region_hunan
+  name: 湖南
+  parent: geography
+
+- id: geo_dongting
+  name: 岳阳 · 洞庭湖、君山
+  parent: geo_region_hunan
+
+- id: geo_changsha
+  name: 长沙 · 潭州
+  parent: geo_region_hunan
+
+- id: geo_yongzhou
+  name: 永州 · 小石潭
+  parent: geo_region_hunan
+
+- id: geo_longbiao
+  name: 洪江一带 · 龙标
+  parent: geo_region_hunan
+
+- id: geo_hengyang
+  name: 衡阳 · 回雁峰
+  parent: geo_region_hunan
+
+- id: geo_region_jiangsu
+  name: 江苏
+  parent: geography
+
+- id: geo_yangzhou
+  name: 扬州 · 广陵、瓜洲
+  parent: geo_region_jiangsu
+
+- id: geo_zhenjiang
+  name: 镇江 · 京口、润州
+  parent: geo_region_jiangsu
+
+- id: geo_nanjing
+  name: 南京 · 金陵、钟山
+  parent: geo_region_jiangsu
+
+- id: geo_suzhou
+  name: 苏州 · 姑苏
+  parent: geo_region_jiangsu
+
+- id: geo_changshu
+  name: 常熟 · 虞山、破山寺
+  parent: geo_region_jiangsu
+
+- id: geo_liyang
+  name: 溧阳 · 溧上
+  parent: geo_region_jiangsu
+
+- id: geo_region_zhejiang
+  name: 浙江
+  parent: geography
+
+- id: geo_hangzhou
+  name: 杭州 · 钱塘、西湖
+  parent: geo_region_zhejiang
+
+- id: geo_shaoxing
+  name: 绍兴 · 会稽、山阴
+  parent: geo_region_zhejiang
+
+- id: geo_quzhou
+  name: 衢州 · 三衢
+  parent: geo_region_zhejiang
+
+- id: geo_dongyang
+  name: 金华 · 东阳
+  parent: geo_region_zhejiang
+
+- id: geo_region_anhui
+  name: 安徽
+  parent: geography
+
+- id: geo_jingxian
+  name: 泾县 · 桃花潭
+  parent: geo_region_anhui
+
+- id: geo_xuancheng
+  name: 宣城 · 敬亭山
+  parent: geo_region_anhui
+
+- id: geo_tianmen
+  name: 芜湖、马鞍山 · 天门山
+  parent: geo_region_anhui
+
+- id: geo_chuzhou
+  name: 滁州 · 琅琊山
+  parent: geo_region_anhui
+
+- id: geo_wujiang
+  name: 和县 · 乌江
+  parent: geo_region_anhui
+
+- id: geo_region_jiangxi
+  name: 江西
+  parent: geography
+
+- id: geo_lushan
+  name: 九江庐山 · 香炉峰
+  parent: geo_region_jiangxi
+
+- id: geo_jiujiang
+  name: 九江 · 江州、浔阳、柴桑
+  parent: geo_region_jiangxi
+
+- id: geo_pengze
+  name: 彭泽
+  parent: geo_region_jiangxi
+
+- id: geo_fuliang
+  name: 景德镇 · 浮梁
+  parent: geo_region_jiangxi
+
+- id: geo_nanchang
+  name: 南昌 · 滕王阁
+  parent: geo_region_jiangxi
+
+- id: geo_poyang
+  name: 鄱阳湖 · 彭蠡
+  parent: geo_region_jiangxi
+
+- id: geo_boshan
+  name: 上饶广丰 · 博山
+  parent: geo_region_jiangxi
+
+- id: geo_region_guangdong
+  name: 广东
+  parent: geography
+
+- id: geo_chaozhou
+  name: 潮州
+  parent: geo_region_guangdong
+
+- id: geo_region_xinjiang
+  name: 新疆
+  parent: geography
+
+- id: geo_anxi
+  name: 安西都护府 · 龟兹、库车
+  parent: geo_region_xinjiang
+
+- id: geo_tang_luntai
+  name: 乌鲁木齐一带 · 唐轮台
+  parent: geo_region_xinjiang
+
+- id: geo_region_regions
+  name: 古代区域与跨境山河
+  parent: geography
+
+- id: geo_jiangnan
+  name: 江南
+  parent: geo_region_regions
+
+- id: geo_bashu
+  name: 巴蜀 · 巴山、蜀地
+  parent: geo_region_regions
+
+- id: geo_luntai
+  name: 轮台 · 历史边塞
+  parent: geo_region_regions
+
+- id: geo_wudi
+  name: 吴地 · 东吴
+  parent: geo_region_regions
+
+- id: geo_jiangdong
+  name: 江东
+  parent: geo_region_regions
+
+- id: geo_sanqin
+  name: 三秦 · 关中
+  parent: geo_region_regions
+
+- id: geo_qilu
+  name: 齐鲁
+  parent: geo_region_regions
+
+- id: geo_wuling
+  name: 武陵郡
+  parent: geo_region_regions
+
+- id: geo_nanyang
+  name: 南阳郡 · 诸葛庐
+  parent: geo_region_regions
+
+- id: geo_yizhou
+  name: 益州
+  parent: geo_region_regions
+
+- id: geo_lujiang
+  name: 庐江郡
+  parent: geo_region_regions
+
+- id: geo_yellowriver
+  name: 黄河
+  parent: geo_region_regions
+
+- id: geo_yangtze
+  name: 长江
+  parent: geo_region_regions
+
+- id: geo_threegorges
+  name: 三峡
+  parent: geo_region_regions
+
+- id: geo_tianshan
+  name: 天山
+  parent: geo_region_regions
+
+- id: geo_yanran
+  name: 蒙古国杭爱山 · 燕然山
+  parent: geo_region_regions
+
+- id: geo_qinling
+  name: 秦岭 · 太白山
+  parent: geo_region_regions
+
+- id: geo_weishui
+  name: 渭河 · 渭水
+  parent: geo_region_regions
+
+- id: geo_region_uncertain
+  name: 地望有待辨析
+  parent: geography
+
+- id: geo_xisai
+  name: 西塞山
+  parent: geo_region_uncertain
+
+- id: geo_xinghua
+  name: 杏花村
+  parent: geo_region_uncertain
+
+- id: geo_yanshan
+  name: 燕山
+  parent: geo_region_uncertain
+
+- id: geo_jieshi
+  name: 碣石
+  parent: geo_region_uncertain
+
+- id: geo_shouxiang
+  name: 受降城 · 回乐烽
+  parent: geo_region_uncertain
+
+- id: geo_feilai
+  name: 飞来峰
+  parent: geo_region_uncertain
+
+- id: geo_region_imagined
+  name: 想象中的天地
+  parent: geography
+
+- id: geo_penglai
+  name: 蓬山 · 蓬莱
+  parent: geo_region_imagined
+
+- id: geo_taoyuan
+  name: 桃花源 · 武陵源
+  parent: geo_region_imagined
+
+- id: geo_kunlun
+  name: 昆仑 · 昆山
+  parent: geo_region_imagined
+
+- id: geo_xiaoxiang
+  name: 湘江、潇水 · 潇湘
+  parent: geo_region_hunan

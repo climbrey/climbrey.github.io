@@ -12,6 +12,7 @@ tags:
   - friendship
   - farewell
   - metaphor
+  - geo_jingxian
 quote:
   - 2
   - 3
@@ -65,6 +66,10 @@ related:
 ## 诗里的心意 {#thought}
 
 朴素的送别方式，因为真挚情谊而值得记住。诗用明快的语气写出了对朋友的珍惜。
+
+## 字里的山河 {#places}
+
+桃花潭｜诗中以水深比友情的地点，在今安徽宣城泾县。诗没有详细记述渡口路线，重点是潭水之深仍不及相送之情。
 
 ## 出处与资料 {#sources}
 

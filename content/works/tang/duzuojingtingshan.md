@@ -13,6 +13,7 @@ tags:
   - solitude
   - quiet
   - personification
+  - geo_xuancheng
 quote:
   - 0
   - 1
@@ -66,6 +67,10 @@ related:
 ## 诗里的心意 {#thought}
 
 独处中既可能有寂寞，也可能生出深厚的亲近感。诗把自然写成不必言语的知己。
+
+## 字里的山河 {#places}
+
+敬亭山｜今安徽宣城。诗人以相看不厌写与山为伴；地名是真实的，山的“凝望”则属于拟人。
 
 ## 出处与资料 {#sources}
 

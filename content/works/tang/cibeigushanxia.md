@@ -14,6 +14,8 @@ tags:
   - travel
   - homesick
   - contrast
+  - geo_zhenjiang
+  - geo_luoyang
 quote:
   - 2
   - 3
@@ -79,6 +81,12 @@ related:
 ## 诗里的心意 {#thought}
 
 旅途既有眼前的开阔，也有回望故乡的牵挂。向前流动的季节与向后牵引的乡情共同存在。
+
+## 字里的山河 {#places}
+
+北固山｜题中的行旅地点，在今江苏镇江，临长江。
+
+洛阳｜家书要寄往的故乡，今河南洛阳。眼前江南早春与远方故乡，通过“归雁”连在一起。
 
 ## 出处与资料 {#sources}
 

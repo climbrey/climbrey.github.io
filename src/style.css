@@ -51,3 +51,8 @@ body[data-page=card] .site-header,body[data-page=card] .mobile-nav,body[data-pag
 
 .module-body p{white-space:pre-wrap}
 .source-link{color:var(--green);text-decoration:underline;text-underline-offset:4px;display:inline-block;min-height:36px;padding:2px 4px}
+
+.place-groups{flex:1;min-width:0}.place-group{border-bottom:1px solid var(--line)}.place-group:last-child{border:0}.place-group summary{cursor:pointer;min-height:44px;padding:11px 2px;font-size:14px;color:var(--ink)}.place-group .filter-options{padding:0 0 12px}.geography-filters .filter-chip{white-space:normal;text-align:left;overflow-wrap:anywhere}
+@media(max-width:600px){.discovery-tabs{gap:18px}.discovery-heading{gap:8px}.discovery-heading>.text-btn{white-space:nowrap}}
+
+.discovery-cards[data-view=places] .discovery-card{min-width:110px}

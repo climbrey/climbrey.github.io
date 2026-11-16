@@ -13,6 +13,9 @@ tags:
   - water
   - sadness
   - hyperbole
+  - geo_shaoxing
+  - geo_yellowriver
+  - geo_huashan
 quote:
   - 0
   - 1
@@ -74,6 +77,12 @@ related:
 ## 诗里的心意 {#thought}
 
 诗把山河之美与百姓之苦并置。最深的牵挂不是抽象疆土，而是长期等待中的具体的人。
+
+## 字里的山河 {#places}
+
+山阴 → 绍兴｜写作背景中的居处。
+
+河、岳｜“三万里河”通常指黄河，“五千仞岳”通常指华山（今陕西华阴）。这两处是诗人心中未收复的山河，不能误作站在家门口直接看到的风景。
 
 ## 出处与资料 {#sources}
 

@@ -14,6 +14,11 @@ tags:
   - travel
   - homesick
   - autumn
+  - geo_emei
+  - geo_qingyi
+  - geo_qianwei
+  - geo_threegorges
+  - geo_chongqing_city
 quote:
   - 1
   - 2
@@ -75,6 +80,12 @@ related:
 ## 诗里的心意 {#thought}
 
 远行带来新景，也使熟悉的人与地方更加珍贵。诗借月影保存出发时尚未远去的依恋。
+
+## 字里的山河 {#places}
+
+峨眉山、平羌江｜峨眉山在今四川乐山；平羌江通常指今青衣江。山月的影子随江水进入旅途。
+
+清溪、三峡、渝州｜清溪通常指今四川犍为清溪一带，三峡跨今重庆与湖北，渝州约当今重庆主城一带。诗以少量地名压缩行程，不能按文字先后机械拼成逐站路线。
 
 ## 出处与资料 {#sources}
 

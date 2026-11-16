@@ -7,7 +7,7 @@
     "build": "node scripts/build.js",
     "build:pages": "node scripts/build.js",
     "build:single": "node scripts/build-single.js",
-    "test": "node tests/content.test.js && node tests/content-source.test.js && node tests/personal-content.test.js",
+    "test": "node tests/content.test.js && node tests/content-source.test.js && node tests/personal-content.test.js && node tests/geography.test.js",
     "check:content": "node scripts/content.js"
   },
   "devDependencies": {

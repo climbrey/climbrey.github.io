@@ -13,6 +13,8 @@ tags:
   - light
   - nature
   - motion
+  - geo_tianmen
+  - geo_yangtze
 quote:
   - 1
   - 2
@@ -66,6 +68,10 @@ related:
 ## 诗里的心意 {#thought}
 
 写长江山水的雄奇与旅行中的新鲜感，视角变化使静景充满动势。
+
+## 字里的山河 {#places}
+
+天门山｜长江两岸相对的东西梁山，在今安徽芜湖、马鞍山一带。“楚江”在这里指流经古楚地的长江，不是另一条名叫楚江的河。
 
 ## 出处与资料 {#sources}
 

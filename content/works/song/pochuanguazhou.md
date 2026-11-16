@@ -14,6 +14,9 @@ tags:
   - spring
   - wind
   - question
+  - geo_zhenjiang
+  - geo_yangzhou
+  - geo_nanjing
 quote:
   - 2
   - 3
@@ -67,6 +70,12 @@ related:
 ## 诗里的心意 {#thought}
 
 写思归之情，季节更新与个人行止之间的落差使牵念更深。
+
+## 字里的山河 {#places}
+
+京口 → 镇江｜长江南岸的地点；瓜洲 → 扬州南部的古渡，在江北。两地隔江相望。
+
+钟山 → 南京紫金山｜诗人惦念的居处方向。“江南岸”与“何时照我还”使地理距离成为归心的尺度。
 
 ## 出处与资料 {#sources}
 

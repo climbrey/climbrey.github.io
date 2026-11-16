@@ -67,3 +67,28 @@ feeling:
     label: 友情
     hint: 相知有回声
     scene: flower
+places:
+  - tag: geo_chengdu
+    label: 成都
+    hint: 锦官城的花雨
+    scene: rain
+  - tag: geo_yangzhou
+    label: 扬州
+    hint: 广陵的烟花
+    scene: flower
+  - tag: geo_hangzhou
+    label: 杭州
+    hint: 钱塘的湖山
+    scene: water
+  - tag: geo_xian
+    label: 西安
+    hint: 长安的旧梦
+    scene: moon
+  - tag: geo_huangzhou
+    label: 黄州
+    hint: 赤壁的清风
+    scene: bamboo
+  - tag: geo_fengjie
+    label: 奉节
+    hint: 白帝城的轻舟
+    scene: mountain

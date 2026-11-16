@@ -29,7 +29,8 @@
 function validateDiscovery(input,str,ident,list){
   if(!input||typeof input!=='object')throw new Error('发现配置无效');
   const choices=(key)=>list(input[key]||[],'发现入口',100).map(c=>({tag:ident(c.tag,'入口分类'),label:str(c.label,'入口名称',50),hint:str(c.hint||'','入口说明',100),...(key==='motifs'?{icon:ident(c.icon||c.tag,'入口图标')}:{scene:['moon','mountain','water','rain','snow','bamboo','flower'].includes(c.scene)?c.scene:'mountain'})}));
-  return {defaultWork:input.defaultWork?ident(input.defaultWork,'首页作品'):'',featuredMark:str(input.featuredMark||'','专题标记',10),motifs:choices('motifs'),landscape:choices('landscape'),feeling:choices('feeling')};
+  // Keep absent optional fields absent so old backups do not override new published entries.
+  return {defaultWork:input.defaultWork?ident(input.defaultWork,'首页作品'):'',featuredMark:str(input.featuredMark||'','专题标记',10),motifs:choices('motifs'),landscape:choices('landscape'),feeling:choices('feeling'),...(input.places!==undefined?{places:choices('places')}:{})};
 }
 return {validateLibrary};
 });

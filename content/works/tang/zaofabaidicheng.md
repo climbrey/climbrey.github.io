@@ -13,6 +13,9 @@ tags:
   - joy
   - hope
   - motion
+  - geo_fengjie
+  - geo_jiangling
+  - geo_threegorges
 quote:
   - 1
   - 2
@@ -66,6 +69,12 @@ related:
 ## 诗里的心意 {#thought}
 
 写归途的明快与舒展，山水的速度带出心情的轻盈。
+
+## 字里的山河 {#places}
+
+白帝城｜清晨辞别之处，在今重庆奉节。
+
+江陵｜行船目的地，在今湖北荆州一带。诗中从白帝城顺长江东下，经过三峡；“千里”“一日”共同写出遇赦后轻快的感受，不是现代行程表。
 
 ## 出处与资料 {#sources}
 

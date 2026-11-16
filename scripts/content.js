@@ -60,8 +60,9 @@ function collectContent(root=ROOT) {
     }
   }
   if(!discovery||typeof discovery!=='object'||Array.isArray(discovery))fail(path.join(root,'discovery.yaml'),'需要发现配置对象');
-  keys(discovery,['defaultWork','featuredMark','motifs','landscape','feeling'],path.join(root,'discovery.yaml'));
-  for(const key of ['motifs','landscape','feeling']){
+  keys(discovery,['defaultWork','featuredMark','motifs','landscape','feeling','places'],path.join(root,'discovery.yaml'));
+  for(const key of ['motifs','landscape','feeling','places']){
+    if(key==='places'&&discovery[key]===undefined)continue;
     if(!Array.isArray(discovery[key]))fail(path.join(root,'discovery.yaml'),key+' 需要入口列表');
     for(const item of discovery[key]){
       if(!item||typeof item!=='object')fail(path.join(root,'discovery.yaml'),'入口需要字段对象');
@@ -123,7 +124,7 @@ function collectContent(root=ROOT) {
     if(t.tag&&!tagIds.has(t.tag))fail(topicFiles.get(t.id),'专题分类不存在：'+t.tag);
   }
   if(discovery.defaultWork&&!workIds.has(discovery.defaultWork))fail(path.join(root,'discovery.yaml'),'首页作品不存在：'+discovery.defaultWork);
-  for(const key of ['motifs','landscape','feeling'])for(const c of discovery[key]||[])if(!tagIds.has(c.tag))fail(path.join(root,'discovery.yaml'),'入口分类不存在：'+c.tag);
+  for(const key of ['motifs','landscape','feeling','places'])for(const c of discovery[key]||[])if(!tagIds.has(c.tag))fail(path.join(root,'discovery.yaml'),'入口分类不存在：'+c.tag);
   try { return validateLibrary({...site,authors,works,tags,topics,modules,discovery}); }
   catch(e) { fail(root,e.message); }
 }

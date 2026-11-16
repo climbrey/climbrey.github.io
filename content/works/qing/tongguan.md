@@ -14,6 +14,8 @@ tags:
   - resolve
   - boldstyle
   - personification
+  - geo_tongguan
+  - geo_yellowriver
 quote:
   - 1
   - 2
@@ -75,6 +77,10 @@ related:
 ## 诗里的心意 {#thought}
 
 诗中的壮阔不仅来自高山大河，也来自看待它们的人。向往自由舒展的心，使风景充满力量。
+
+## 字里的山河 {#places}
+
+潼关｜今陕西渭南潼关，地处黄河与秦岭之间的关隘。诗中河流、群山的运动感与这处山河交会的地势相应。
 
 ## 出处与资料 {#sources}
 

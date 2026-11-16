@@ -127,11 +127,12 @@
 
   function rootTag(id) { let tag=tagById(id),n=0;while(tag&&tag.parent&&n++<30)tag=tagById(tag.parent);return tag?tag.id:id; }
   function descendant(id,parent) { let t=tagById(id),n=0;while(t&&n++<30){if(t.id===parent)return true;t=tagById(t.parent);}return false; }
+  function tagSearchNames(ids) {const names=new Set();ids.forEach(id=>{let t=tagById(id),n=0;while(t&&n++<30){names.add(t.name);t=tagById(t.parent);}});return [...names].join(' ');}
   function filteredWorks() {
     const groups={};explore.tags.forEach(id=>(groups[rootTag(id)]||(groups[rootTag(id)]=[])).push(id));
     const topic=library.topics.find(t=>t.id===explore.topic),q=explore.search.trim().toLocaleLowerCase();
     return library.works.filter(w=>{
-      const a=authorOf(w),searchText=[w.title,a.name,a.dynasty,w.form,w.lines.join(''),w.tags.map(t=>(tagById(t)||{}).name).join(' ')].join(' ').toLocaleLowerCase();
+      const a=authorOf(w),searchText=[w.title,a.name,a.dynasty,w.form,w.lines.join(''),tagSearchNames(w.tags),w.extra.places||''].join(' ').toLocaleLowerCase();
       return (!q||searchText.includes(q))&&(!explore.author||w.author===explore.author)&&(!explore.form||w.form===explore.form)&&(!explore.stage||w.stage.includes(explore.stage))&&(!topic||topic.works.includes(w.id))&&Object.values(groups).every(ids=>ids.some(id=>w.tags.some(t=>descendant(t,id))));
     });
   }
@@ -139,15 +140,17 @@
     const r=tagById(root);if(!r)return '';
     let members=library.tags.filter(t=>t.parent===root);if(!members.length)members=[r];
     const branch=(t,depth=0)=>'<button class="filter-chip '+(depth?'filter-child ':'')+(explore.tags.includes(t.id)?'selected':'')+'" data-action="filter" data-id="'+esc(t.id)+'" aria-pressed="'+explore.tags.includes(t.id)+'">'+(depth?'· ':'')+esc(t.name)+'</button>'+library.tags.filter(c=>c.parent===t.id).map(c=>branch(c,depth+1)).join('');
+    if(root==='geography')return '<div class="filter-row geography-filters"><span class="filter-label">'+esc(r.name)+'</span><div class="place-groups">'+members.map(t=>'<details class="place-group" '+(explore.tags.some(id=>descendant(id,t.id))?'open':'')+'><summary>'+esc(t.name)+'</summary><div class="filter-options">'+branch(t)+'</div></details>').join('')+'</div></div>';
     return '<div class="filter-row"><span class="filter-label">'+esc(r.name)+'</span><div class="filter-options">'+members.map(t=>branch(t)).join('')+'</div></div>';
   }
   function discoveryCards() {
-    const choices=library.discovery[explore.view==='feeling'?'feeling':'landscape'];
+    const choices=library.discovery[explore.view]||[];
     return choices.filter(c=>tagById(c.tag)).map(({tag:id,label:name,hint:note,scene:art})=>'<button class="discovery-card" data-action="filter" data-id="'+id+'" aria-pressed="'+explore.tags.includes(id)+'"><span class="discovery-art">'+scene(art,'find-'+id)+'</span><strong>'+esc(name)+'</strong><span>'+esc(note)+'</span><span class="selection-check" aria-hidden="true">'+icon('check')+'</span></button>').join('');
   }
+  function exploreIntro() {return explore.view==='places'?'从锦官城到成都，在字里行间重逢一座城。':'一个熟悉的名字，一句记得的文字。';}
   function explorePage() {
     const topic=library.topics.find(t=>t.id===explore.topic);
-    return '<section class="explore-page"><p class="eyebrow">循着喜欢，自在漫游</p><h1 id="explore-title" class="page-title">'+esc(topic?topic.name:'从眼前的景，走向心里的诗。')+'</h1><p id="explore-intro" class="page-intro">'+esc(topic?topic.subtitle:'一个熟悉的名字，一句记得的文字。')+'</p><div class="search-field">'+icon('search')+'<input id="search" type="search" value="'+esc(explore.search)+'" placeholder="搜索篇名、作者、诗句" aria-label="搜索篇名、诗句、作者" autocomplete="off"><button class="icon-btn search-clear" data-action="clear-search" aria-label="清除搜索" '+(!explore.search?'hidden':'')+'>'+icon('close')+'</button></div><div class="discovery-heading"><div class="discovery-tabs" aria-label="发现方式"><button data-action="explore-view" data-id="landscape" aria-pressed="'+(explore.view!=='feeling')+'">风景</button><button data-action="explore-view" data-id="feeling" aria-pressed="'+(explore.view==='feeling')+'">心境</button></div><button class="text-btn" data-action="filters">'+icon('sliders')+' 更多线索</button></div><div id="discovery-cards" class="discovery-cards">'+discoveryCards()+'</div><div id="explore-results">'+exploreResults()+'</div></section>';
+    return '<section class="explore-page"><p class="eyebrow">循着喜欢，自在漫游</p><h1 id="explore-title" class="page-title">'+esc(topic?topic.name:'从眼前的景，走向心里的诗。')+'</h1><p id="explore-intro" class="page-intro">'+esc(topic?topic.subtitle:exploreIntro())+'</p><div class="search-field">'+icon('search')+'<input id="search" type="search" value="'+esc(explore.search)+'" placeholder="搜索诗文、作者、古今地名" aria-label="搜索诗文、作者、古今地名" autocomplete="off"><button class="icon-btn search-clear" data-action="clear-search" aria-label="清除搜索" '+(!explore.search?'hidden':'')+'>'+icon('close')+'</button></div><div class="discovery-heading"><div class="discovery-tabs" aria-label="发现方式"><button data-action="explore-view" data-id="landscape" aria-pressed="'+(explore.view==='landscape')+'">风景</button><button data-action="explore-view" data-id="feeling" aria-pressed="'+(explore.view==='feeling')+'">心境</button><button data-action="explore-view" data-id="places" aria-pressed="'+(explore.view==='places')+'">地名</button></div><button class="text-btn" data-action="filters">'+icon('sliders')+' 更多线索</button></div><div id="discovery-cards" class="discovery-cards" data-view="'+explore.view+'">'+discoveryCards()+'</div><div id="explore-results">'+exploreResults()+'</div></section>';
   }
   function exploreResults() {
     const works=filteredWorks();
@@ -162,7 +165,7 @@
     $$('[data-action="filter"]').forEach(b=>{const active=explore.tags.includes(b.dataset.id);b.classList.toggle('selected',active);b.setAttribute('aria-pressed',String(active));});
     const topic=library.topics.find(t=>t.id===explore.topic);
     $('#explore-title').textContent=topic?topic.name:'从眼前的景，走向心里的诗。';
-    $('#explore-intro').textContent=topic?topic.subtitle:'一个熟悉的名字，一句记得的文字。';
+    $('#explore-intro').textContent=topic?topic.subtitle:exploreIntro();
     $('.search-clear').hidden=!explore.search;
     if($('#filter-count'))$('#filter-count').textContent='查看 '+filteredWorks().length+' 篇作品';
   }
@@ -171,7 +174,7 @@
       const options=key==='author'?Object.entries(library.authors).map(([id,a])=>[id,a.dynasty+' · '+a.name]):(key==='form'?Array.from(new Set(library.works.map(w=>w.form))):['小学','初中','高中']).map(v=>[v,v]);
       return '<label class="field"><span>'+label+'</span><select id="'+key+'-filter"><option value="">不限</option>'+options.map(([value,name])=>'<option value="'+esc(value)+'" '+(explore[key]===value?'selected':'')+'>'+esc(name)+'</option>').join('')+'</select></label>';
     }).join('')+'</div>';
-    openModal('沿着更多线索','<p class="modal-subtitle">同一类别可任选其一，不同类别会一起筛选。</p><div class="advanced-filters">'+library.tags.filter(t=>!t.parent).map(t=>filterRow(t.id)).join('')+selects+'</div>',true);
+    openModal('沿着更多线索','<p class="modal-subtitle">同一类别可任选其一，不同类别会一起筛选。</p><div class="advanced-filters">'+library.tags.filter(t=>!t.parent).sort((a,b)=>explore.view==='places'?Number(b.id==='geography')-Number(a.id==='geography'):0).map(t=>filterRow(t.id)).join('')+selects+'</div>',true);
     dialog.classList.add('filter-dialog');
     const footer=document.createElement('footer');footer.className='modal-footer';footer.innerHTML='<button class="text-btn" data-action="clear-filters">清除条件</button><button class="btn primary" data-action="close-modal" id="filter-count">查看 '+filteredWorks().length+' 篇作品</button>';dialog.appendChild(footer);
   }
@@ -242,7 +245,7 @@
     if(['home','explore','saved'].includes(route))lastListing=hash;
     let html='',work=null;
     if(route==='explore'){
-      explore={search:params.get('q')||'',tags:params.getAll('tag').filter(tagById),author:params.get('author')||'',form:params.get('form')||'',stage:params.get('stage')||'',topic:params.get('topic')||'',view:params.get('view')==='feeling'?'feeling':'landscape'};
+      explore={search:params.get('q')||'',tags:params.getAll('tag').filter(tagById),author:params.get('author')||'',form:params.get('form')||'',stage:params.get('stage')||'',topic:params.get('topic')||'',view:['feeling','places'].includes(params.get('view'))?params.get('view'):'landscape'};
       html=explorePage();
     }else if(route==='saved')html=savedPage();
     else if(route.startsWith('work/')){
@@ -501,7 +504,7 @@
     if(explore.search)params.set('q',explore.search);
     explore.tags.forEach(id=>params.append('tag',id));
     for(const key of ['author','form','stage','topic'])if(explore[key])params.set(key,explore[key]);
-    if(explore.view==='feeling')params.set('view','feeling');
+    if(explore.view!=='landscape')params.set('view',explore.view);
     const hash='#explore'+(params.toString()?'?'+params:'');
     history.replaceState(null,'',hash);previousRoute=hash;lastListing=hash;
     if(defer)searchTimer=setTimeout(updateResults,100);else updateResults();
@@ -534,7 +537,7 @@
         case 'close-modal':closeModal();break;
         case 'undo':if(undoAction){const undo=undoAction;undoAction=null;undo();$('#toast').classList.remove('show');}break;
         case 'filters':openFilters();break;
-        case 'explore-view':explore.view=id;$$('[data-action="explore-view"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));$('#discovery-cards').innerHTML=discoveryCards();filterChanged();break;
+        case 'explore-view':explore.view=id;$$('[data-action="explore-view"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));$('#discovery-cards').dataset.view=explore.view;$('#discovery-cards').innerHTML=discoveryCards();filterChanged();break;
         case 'backup-settings':settings();$$('.settings-group',dialog).filter(x=>x.tagName==='DETAILS')[2].open=true;break;
         case 'dismiss-hint':state.hintDismissed=true;persist();$('.poem-hint')?.remove();break;
         case 'read-insight':{const module=$('[data-module="reading"]');if(module){module.open=true;module.scrollIntoView({block:'start',behavior:reducedMotion()?'auto':'smooth'});}break;}
@@ -545,7 +548,7 @@
         case 'search':if($('#search')){$('#search').focus();$('#search').scrollIntoView({block:'center',behavior:'auto'});}else{focusSearch=true;location.hash='#explore';}break;
         case 'shuffle':shuffleWork();break;
         case 'favorite':toggleFavorite(id);break;
-        case 'tag':location.hash='#explore?tag='+encodeURIComponent(id);break;
+        case 'tag':location.hash='#explore?tag='+encodeURIComponent(id)+(rootTag(id)==='geography'?'&view=places':'');break;
         case 'filter':explore.tags=explore.tags.includes(id)?explore.tags.filter(x=>x!==id):[...explore.tags,id];filterChanged();break;
         case 'clear-topic':explore.topic='';filterChanged();break;
         case 'clear-filters':explore={search:'',tags:[],author:'',form:'',stage:'',topic:'',view:explore.view};$('#search').value='';['author','form','stage'].forEach(key=>{const field=$('#'+key+'-filter');if(field)field.value='';});filterChanged();break;
