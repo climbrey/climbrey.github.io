@@ -46,6 +46,7 @@ python tests/edge_cases.py
 python tests/content_updates.py
 python tests/corpus_smoke.py
 python tests/interaction_smoke.py
+python tests/experience_smoke.py
 python tests/pwa_smoke.py
 python tests/pwa_smoke.py --root
 ```

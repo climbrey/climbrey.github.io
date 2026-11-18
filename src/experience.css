@@ -1,0 +1,73 @@
+/* Small, finite gestures keep the reading surface quiet. */
+.scene-leaves{transform-box:fill-box;transform-origin:90% 100%}
+.scene-ripples,.scene-rain{transform-box:fill-box;transform-origin:center}
+.poem-cover{transform-origin:12% 50%}
+.motif-orb{transition:transform .35s,background-color .25s,box-shadow .25s}
+.motif:focus-visible .motif-orb{transform:rotate(-8deg);background:#dce7d0}
+.letter-room{position:relative;display:grid;grid-template-columns:1.1fr 1fr;margin-top:46px;background:#eeeee2;border:1px solid #e0e3d4;border-radius:20px;overflow:hidden}
+.letter-desk{padding:30px 30px 35px;background:radial-gradient(ellipse at 20% 15%,#faf9f0,transparent 75%)}
+.letter-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:26px}
+.letter-heading h2{font:28px/1.5 var(--serif);letter-spacing:2px}
+.letter-heading .eyebrow{font-size:11px;letter-spacing:1px;margin-bottom:5px}
+.letter-heading>.text-btn{white-space:nowrap;font-size:12px;gap:5px}
+.letter-heading>.text-btn svg{width:16px;height:16px}
+.letter-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:5px 2px}
+.poem-letter{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;min-width:0;padding:35px 5px 16px;min-height:190px;border:1px solid #d7ddc9;border-radius:4px 4px 13px 4px;background:#f9f8ef;box-shadow:0 8px 16px -12px #536b4180;transform:rotate(-4deg);transition:transform .35s,box-shadow .35s,border-color .25s,background-color .25s}
+.poem-letter:before{content:"";position:absolute;inset:0 0 auto;height:56px;z-index:-1;background:linear-gradient(165deg,#e1e7d4,#eef0e1);clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transition:transform .45s,opacity .45s}
+.letter-1{transform:translateY(8px) rotate(1deg);background:#fcf7ee;border-color:#e0d7c8}
+.letter-1:before{background:linear-gradient(165deg,#e9ddcb,#f3eadd)}
+.letter-2{transform:rotate(4deg);background:#f1f6f0;border-color:#d2ded2}
+.letter-2:before{background:linear-gradient(165deg,#d4e2d6,#e8f0e7)}
+.letter-number{position:absolute;top:11px;left:12px;font:11px var(--serif);color:#68765d}
+.letter-emblem{display:grid;place-items:center;width:45px;height:45px;margin:4px 0 13px;border:1px solid #a9b99a;border-radius:50%;color:#51724d;background:#f8f9ef}
+.letter-emblem svg{width:22px;height:22px}
+.letter-cue{font:17px/1.7 var(--serif);letter-spacing:1px;overflow-wrap:anywhere}
+.letter-open{font-size:11px;color:var(--muted);margin-top:12px}
+.poem-letter[aria-expanded=true]{transform:translateY(-5px) rotate(0);border-color:#80976c;background:#fffdf5;box-shadow:0 12px 20px -12px #536b4170}
+.poem-letter[aria-expanded=true]:before{transform:scaleY(.45);opacity:.5}
+.poem-letter[aria-expanded=true] .letter-emblem{color:var(--red);border-color:#c0a18b}
+.letter-result{position:relative;display:flex;align-items:center;min-width:0;min-height:345px;padding:36px;border-left:1px dashed #c9d2bb;background:linear-gradient(130deg,#fffdf6e6,#faf9ef80)}
+.letter-waiting,.letter-revealed{width:100%;position:relative}
+.letter-waiting h3{font:30px/1.8 var(--serif);letter-spacing:2px;margin:12px 0}
+.letter-waiting>p:last-child{font-size:13px;color:var(--muted);line-height:1.9}
+.letter-postmark{position:absolute;right:0;bottom:4px;width:70px;height:70px;display:grid;place-items:center;border:3px double #a8b49a;border-radius:50%;font:12px var(--serif);letter-spacing:2px;color:#63785b;transform:rotate(-14deg);opacity:.8}
+.letter-revealed blockquote{font:24px/1.9 var(--serif);letter-spacing:1px;white-space:pre-line;overflow-wrap:anywhere;margin:12px 0 15px}
+.letter-source{font-size:12px;line-height:1.8;color:var(--muted);overflow-wrap:anywhere}
+.letter-revealed .row{margin-top:24px;gap:16px}
+.letter-revealed .btn{min-width:115px}
+.reader-trail{margin:38px 0 10px;padding-top:30px;border-top:1px solid var(--line)}
+.reader-trail>h2{font:27px/1.6 var(--serif);letter-spacing:1px}
+.trail-cards{display:grid;gap:16px;margin-top:23px}
+.trail-card{position:relative;display:grid;grid-template-columns:116px minmax(0,1fr);min-height:200px;border:1px solid #dfe5d7;border-radius:9px 24px 9px 9px;overflow:hidden;background:linear-gradient(120deg,#f0f3e9,#fffdf7);transition:box-shadow .25s,border-color .25s}
+.trail-art{display:block;min-height:100%;overflow:hidden}
+.trail-art>svg{width:100%;height:100%;transition:transform .5s}
+.trail-copy{display:block;padding:21px 24px;min-width:0}
+.trail-meta{font-size:11px;color:var(--muted)}
+.trail-copy h3{font:23px/1.6 var(--serif);margin-top:4px;overflow-wrap:anywhere}
+.trail-quote{display:block;white-space:pre-line;font:17px/1.9 var(--serif);color:#395749;margin-top:10px;overflow-wrap:anywhere}
+.trail-reason{display:block;font-size:12px;line-height:1.8;color:var(--muted);margin-top:12px}
+.trail-go{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--green);margin-top:14px}
+.trail-go svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;transition:transform .25s}
+[data-action=favorite],[data-action=save-quote]{isolation:isolate}
+.detail-actions [data-action=favorite],[data-action=save-quote]{position:relative}
+.save-petal{position:absolute;pointer-events:none;top:35%;left:50%;width:7px;height:11px;border-radius:1px 8px 1px 8px;background:#9dab78;z-index:2}
+.save-petal:nth-of-type(2){background:#bf9b79}
+@media(hover:hover) and (pointer:fine){
+  .motif:hover .motif-orb{transform:translateY(-5px) rotate(-10deg);background:#dce7d0;box-shadow:0 8px 20px -10px #45693d60}
+  .poem-letter:hover{transform:translateY(-7px) rotate(0);box-shadow:0 14px 25px -12px #536b4170}
+  .trail-card:hover{border-color:#b7c7ab;box-shadow:0 10px 24px -16px #536b4170}
+  .trail-card:hover .trail-art>svg{transform:scale(1.06)}
+  .trail-card:hover .trail-go svg{transform:translateX(5px)}
+}
+@media(max-width:900px){
+  .letter-desk{padding:25px 22px 30px}.letter-result{padding:28px}.letter-choices{gap:10px}.letter-cue{font-size:15px}
+}
+@media(max-width:700px){
+  .letter-room{display:block;margin-top:32px;border-radius:16px}
+  .letter-desk{padding:25px 20px 27px}.letter-heading{margin-bottom:19px}.letter-heading h2{font-size:25px}.letter-heading .eyebrow{font-size:10px;letter-spacing:.5px}
+  .letter-choices{gap:12px}.poem-letter{min-height:157px;padding:28px 4px 13px}.poem-letter:before{height:43px}.letter-number{font-size:10px;left:9px;top:8px}.letter-emblem{width:36px;height:36px;margin:6px 0 9px}.letter-emblem svg{width:19px;height:19px}.letter-cue{font-size:15px;letter-spacing:0}.letter-open{font-size:10px;margin-top:8px}
+  .letter-result{border-left:0;border-top:1px dashed #c9d2bb;min-height:300px;padding:26px 25px}.letter-waiting h3{font-size:27px}.letter-revealed blockquote{font-size:22px;line-height:1.85}.letter-postmark{width:63px;height:63px;font-size:11px}
+  .reader-trail{margin-top:30px;padding-top:25px}.reader-trail>h2{font-size:24px}.trail-card{grid-template-columns:73px minmax(0,1fr)}.trail-copy{padding:18px}.trail-copy h3{font-size:21px}.trail-quote{font-size:17px}.trail-reason{font-size:12px}.trail-art>svg{object-fit:cover}
+}
+@media(max-width:360px){.letter-desk{padding:23px 15px 26px}.letter-choices{gap:8px}.letter-heading>.text-btn{font-size:11px}.letter-heading .eyebrow{font-size:9px}.letter-cue{font-size:14px}.letter-result{padding:23px 20px}.trail-card{grid-template-columns:54px minmax(0,1fr)}.trail-copy{padding:16px}}
+@media(prefers-reduced-motion:reduce){.motif-orb,.poem-letter,.poem-letter:before,.trail-card,.trail-art>svg,.trail-go svg{transition:none!important}.motif:hover .motif-orb,.poem-letter:hover,.trail-card:hover .trail-art>svg,.trail-card:hover .trail-go svg{transform:none}}

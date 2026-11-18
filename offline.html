@@ -65,6 +65,80 @@ body[data-page=card] .site-header,body[data-page=card] .mobile-nav,body[data-pag
 @media(max-width:600px){.discovery-tabs{gap:18px}.discovery-heading{gap:8px}.discovery-heading>.text-btn{white-space:nowrap}}
 
 .discovery-cards[data-view=places] .discovery-card{min-width:110px}
+
+/* Small, finite gestures keep the reading surface quiet. */
+.scene-leaves{transform-box:fill-box;transform-origin:90% 100%}
+.scene-ripples,.scene-rain{transform-box:fill-box;transform-origin:center}
+.poem-cover{transform-origin:12% 50%}
+.motif-orb{transition:transform .35s,background-color .25s,box-shadow .25s}
+.motif:focus-visible .motif-orb{transform:rotate(-8deg);background:#dce7d0}
+.letter-room{position:relative;display:grid;grid-template-columns:1.1fr 1fr;margin-top:46px;background:#eeeee2;border:1px solid #e0e3d4;border-radius:20px;overflow:hidden}
+.letter-desk{padding:30px 30px 35px;background:radial-gradient(ellipse at 20% 15%,#faf9f0,transparent 75%)}
+.letter-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:26px}
+.letter-heading h2{font:28px/1.5 var(--serif);letter-spacing:2px}
+.letter-heading .eyebrow{font-size:11px;letter-spacing:1px;margin-bottom:5px}
+.letter-heading>.text-btn{white-space:nowrap;font-size:12px;gap:5px}
+.letter-heading>.text-btn svg{width:16px;height:16px}
+.letter-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:5px 2px}
+.poem-letter{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;min-width:0;padding:35px 5px 16px;min-height:190px;border:1px solid #d7ddc9;border-radius:4px 4px 13px 4px;background:#f9f8ef;box-shadow:0 8px 16px -12px #536b4180;transform:rotate(-4deg);transition:transform .35s,box-shadow .35s,border-color .25s,background-color .25s}
+.poem-letter:before{content:"";position:absolute;inset:0 0 auto;height:56px;z-index:-1;background:linear-gradient(165deg,#e1e7d4,#eef0e1);clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transition:transform .45s,opacity .45s}
+.letter-1{transform:translateY(8px) rotate(1deg);background:#fcf7ee;border-color:#e0d7c8}
+.letter-1:before{background:linear-gradient(165deg,#e9ddcb,#f3eadd)}
+.letter-2{transform:rotate(4deg);background:#f1f6f0;border-color:#d2ded2}
+.letter-2:before{background:linear-gradient(165deg,#d4e2d6,#e8f0e7)}
+.letter-number{position:absolute;top:11px;left:12px;font:11px var(--serif);color:#68765d}
+.letter-emblem{display:grid;place-items:center;width:45px;height:45px;margin:4px 0 13px;border:1px solid #a9b99a;border-radius:50%;color:#51724d;background:#f8f9ef}
+.letter-emblem svg{width:22px;height:22px}
+.letter-cue{font:17px/1.7 var(--serif);letter-spacing:1px;overflow-wrap:anywhere}
+.letter-open{font-size:11px;color:var(--muted);margin-top:12px}
+.poem-letter[aria-expanded=true]{transform:translateY(-5px) rotate(0);border-color:#80976c;background:#fffdf5;box-shadow:0 12px 20px -12px #536b4170}
+.poem-letter[aria-expanded=true]:before{transform:scaleY(.45);opacity:.5}
+.poem-letter[aria-expanded=true] .letter-emblem{color:var(--red);border-color:#c0a18b}
+.letter-result{position:relative;display:flex;align-items:center;min-width:0;min-height:345px;padding:36px;border-left:1px dashed #c9d2bb;background:linear-gradient(130deg,#fffdf6e6,#faf9ef80)}
+.letter-waiting,.letter-revealed{width:100%;position:relative}
+.letter-waiting h3{font:30px/1.8 var(--serif);letter-spacing:2px;margin:12px 0}
+.letter-waiting>p:last-child{font-size:13px;color:var(--muted);line-height:1.9}
+.letter-postmark{position:absolute;right:0;bottom:4px;width:70px;height:70px;display:grid;place-items:center;border:3px double #a8b49a;border-radius:50%;font:12px var(--serif);letter-spacing:2px;color:#63785b;transform:rotate(-14deg);opacity:.8}
+.letter-revealed blockquote{font:24px/1.9 var(--serif);letter-spacing:1px;white-space:pre-line;overflow-wrap:anywhere;margin:12px 0 15px}
+.letter-source{font-size:12px;line-height:1.8;color:var(--muted);overflow-wrap:anywhere}
+.letter-revealed .row{margin-top:24px;gap:16px}
+.letter-revealed .btn{min-width:115px}
+.reader-trail{margin:38px 0 10px;padding-top:30px;border-top:1px solid var(--line)}
+.reader-trail>h2{font:27px/1.6 var(--serif);letter-spacing:1px}
+.trail-cards{display:grid;gap:16px;margin-top:23px}
+.trail-card{position:relative;display:grid;grid-template-columns:116px minmax(0,1fr);min-height:200px;border:1px solid #dfe5d7;border-radius:9px 24px 9px 9px;overflow:hidden;background:linear-gradient(120deg,#f0f3e9,#fffdf7);transition:box-shadow .25s,border-color .25s}
+.trail-art{display:block;min-height:100%;overflow:hidden}
+.trail-art>svg{width:100%;height:100%;transition:transform .5s}
+.trail-copy{display:block;padding:21px 24px;min-width:0}
+.trail-meta{font-size:11px;color:var(--muted)}
+.trail-copy h3{font:23px/1.6 var(--serif);margin-top:4px;overflow-wrap:anywhere}
+.trail-quote{display:block;white-space:pre-line;font:17px/1.9 var(--serif);color:#395749;margin-top:10px;overflow-wrap:anywhere}
+.trail-reason{display:block;font-size:12px;line-height:1.8;color:var(--muted);margin-top:12px}
+.trail-go{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--green);margin-top:14px}
+.trail-go svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;transition:transform .25s}
+[data-action=favorite],[data-action=save-quote]{isolation:isolate}
+.detail-actions [data-action=favorite],[data-action=save-quote]{position:relative}
+.save-petal{position:absolute;pointer-events:none;top:35%;left:50%;width:7px;height:11px;border-radius:1px 8px 1px 8px;background:#9dab78;z-index:2}
+.save-petal:nth-of-type(2){background:#bf9b79}
+@media(hover:hover) and (pointer:fine){
+  .motif:hover .motif-orb{transform:translateY(-5px) rotate(-10deg);background:#dce7d0;box-shadow:0 8px 20px -10px #45693d60}
+  .poem-letter:hover{transform:translateY(-7px) rotate(0);box-shadow:0 14px 25px -12px #536b4170}
+  .trail-card:hover{border-color:#b7c7ab;box-shadow:0 10px 24px -16px #536b4170}
+  .trail-card:hover .trail-art>svg{transform:scale(1.06)}
+  .trail-card:hover .trail-go svg{transform:translateX(5px)}
+}
+@media(max-width:900px){
+  .letter-desk{padding:25px 22px 30px}.letter-result{padding:28px}.letter-choices{gap:10px}.letter-cue{font-size:15px}
+}
+@media(max-width:700px){
+  .letter-room{display:block;margin-top:32px;border-radius:16px}
+  .letter-desk{padding:25px 20px 27px}.letter-heading{margin-bottom:19px}.letter-heading h2{font-size:25px}.letter-heading .eyebrow{font-size:10px;letter-spacing:.5px}
+  .letter-choices{gap:12px}.poem-letter{min-height:157px;padding:28px 4px 13px}.poem-letter:before{height:43px}.letter-number{font-size:10px;left:9px;top:8px}.letter-emblem{width:36px;height:36px;margin:6px 0 9px}.letter-emblem svg{width:19px;height:19px}.letter-cue{font-size:15px;letter-spacing:0}.letter-open{font-size:10px;margin-top:8px}
+  .letter-result{border-left:0;border-top:1px dashed #c9d2bb;min-height:300px;padding:26px 25px}.letter-waiting h3{font-size:27px}.letter-revealed blockquote{font-size:22px;line-height:1.85}.letter-postmark{width:63px;height:63px;font-size:11px}
+  .reader-trail{margin-top:30px;padding-top:25px}.reader-trail>h2{font-size:24px}.trail-card{grid-template-columns:73px minmax(0,1fr)}.trail-copy{padding:18px}.trail-copy h3{font-size:21px}.trail-quote{font-size:17px}.trail-reason{font-size:12px}.trail-art>svg{object-fit:cover}
+}
+@media(max-width:360px){.letter-desk{padding:23px 15px 26px}.letter-choices{gap:8px}.letter-heading>.text-btn{font-size:11px}.letter-heading .eyebrow{font-size:9px}.letter-cue{font-size:14px}.letter-result{padding:23px 20px}.trail-card{grid-template-columns:54px minmax(0,1fr)}.trail-copy{padding:16px}}
+@media(prefers-reduced-motion:reduce){.motif-orb,.poem-letter,.poem-letter:before,.trail-card,.trail-art>svg,.trail-go svg{transition:none!important}.motif:hover .motif-orb,.poem-letter:hover,.trail-card:hover .trail-art>svg,.trail-card:hover .trail-go svg{transform:none}}
 </style>
 </head>
 <body>
@@ -265,7 +339,56 @@ return {validateLibrary};
   return {fingerprint,fingerprints,diff,apply,migrate,uniqueNotices,usePublished};
 });
 </script>
-  <script>(() => {
+  <script>(function(root){
+  'use strict';
+  const preference=matchMedia('(prefers-reduced-motion: reduce)');
+  const active=new Set();
+  let observer;
+  function play(element,frames,options={}) {
+    if(!element?.isConnected||preference.matches||document.hidden||!element.animate)return;
+    const animation=element.animate(frames,{duration:360,easing:'cubic-bezier(.2,.75,.25,1)',...options});
+    active.add(animation);
+    animation.finished.catch(()=>{}).finally(()=>active.delete(animation));
+    return animation;
+  }
+  function clear(){observer?.disconnect();active.forEach(a=>a.cancel());active.clear();}
+  function reveal(element,index=0){
+    if(element.dataset.arrived)return;
+    element.dataset.arrived='true';
+    play(element,[{opacity:.3,transform:'translateY(16px)'},{opacity:1,transform:'none'}],{duration:460,delay:Math.min(index*45,135)});
+  }
+  function observe(container){
+    observer?.disconnect();
+    if(preference.matches||!('IntersectionObserver' in root))return;
+    observer=new IntersectionObserver(entries=>{
+      entries.filter(e=>e.isIntersecting).forEach((e,i)=>{reveal(e.target,i);scene(e.target);observer.unobserve(e.target);});
+    },{threshold:.12});
+    container.querySelectorAll('.letter-room,.topic-card,.reading-invitation,.reader-trail').forEach(el=>observer.observe(el));
+  }
+  function scene(container){
+    container?.querySelectorAll('.scene-leaves').forEach(el=>play(el,[{transform:'rotate(-2deg)'},{transform:'rotate(1deg)',offset:.6},{transform:'none'}],{duration:1050}));
+    container?.querySelectorAll('.scene-light').forEach(el=>play(el,[{opacity:.45},{opacity:1}],{duration:900}));
+    container?.querySelectorAll('.scene-ripples').forEach(el=>play(el,[{transform:'translateX(-9px)',opacity:.05},{transform:'none',opacity:.24}],{duration:1000}));
+    container?.querySelectorAll('.scene-rain').forEach(el=>play(el,[{transform:'translateY(-16px)',opacity:.05},{transform:'none',opacity:.3}],{duration:750}));
+  }
+  function unfold(element){
+    play(element,[{opacity:.25,transform:'perspective(900px) rotateX(-8deg) translateY(8px)'},{opacity:1,transform:'none'}],{duration:440});
+  }
+  function stamp(button){
+    if(!button||preference.matches||document.hidden)return;
+    play(button,[{transform:'scale(.92)'},{transform:'scale(1.07)',offset:.55},{transform:'none'}],{duration:340});
+    for(let i=0;i<3;i++){
+      const petal=document.createElement('span');petal.className='save-petal';petal.setAttribute('aria-hidden','true');button.appendChild(petal);
+      const animation=play(petal,[{opacity:.9,transform:'translate(0,0) rotate(0)'},{opacity:0,transform:'translate('+(i-1)*20+'px,-32px) rotate('+(i-1)*55+'deg)'}],{duration:550,delay:i*35});
+      if(animation)animation.finished.catch(()=>{}).finally(()=>petal.remove());else petal.remove();
+    }
+  }
+  preference.addEventListener?.('change',()=>{if(preference.matches)clear();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){active.forEach(a=>a.cancel());active.clear();}});
+  root.ShanyueExperience={play,clear,observe,scene,unfold,stamp};
+})(globalThis);
+
+(() => {
   'use strict';
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
@@ -273,6 +396,8 @@ return {validateLibrary};
   const clone = value => JSON.parse(JSON.stringify(value));
   const KEY = 'shanyue.reading.v2';
   const Personal = ShanyuePersonal;
+  const Experience = ShanyueExperience;
+  let letters = [], openedLetter = null;
   const SEED = ShanyueLibrary.validateLibrary(JSON.parse($('#library-data').textContent));
   const seedFingerprints = Personal.fingerprints(SEED);
   const validateLibrary = input => ShanyueLibrary.validateLibrary(input, SEED);
@@ -349,12 +474,12 @@ return {validateLibrary};
   function scene(type='mountain',id='scene') {
     const palettes={moon:['#eef0e4','#becdb5','#597e6d'],mountain:['#edf0e5','#b9c9a7','#648776'],water:['#e7efeb','#b4d1c6','#5b887b'],rain:['#e4eeea','#b2c7bc','#668d7e'],snow:['#f0f1eb','#d0dcd2','#8aa396'],bamboo:['#e9efdf','#b6c69b','#64865d'],flower:['#f3eae0','#d8c6ad','#a87963']};
     const [sky,soft,ink]=palettes[type]||palettes.mountain;
-    const lake='<path d="M-20 366Q140 300 300 346T550 332V500H-20Z" fill="'+soft+'" opacity=".42"/><g fill="none" stroke="'+ink+'" opacity=".24"><path d="M90 390q140-35 380 0M45 418q220-40 455-4M180 448q120-18 280-3"/></g>';
-    const leaves='<g fill="none" stroke="'+ink+'" stroke-width="2" opacity=".65"><path d="M423 520q-10-146-75-256M468 510q-44-87-35-193"/></g><g fill="'+ink+'" opacity=".45"><path d="M397 408q-80-16-70-90 64 20 70 90M409 431q8-77 59-89 5 62-59 89M365 318q-50-18-48-61 44 8 48 61M446 430q-39-36-29-77 32 20 29 77"/></g>';
+    const lake='<path d="M-20 366Q140 300 300 346T550 332V500H-20Z" fill="'+soft+'" opacity=".42"/><g class="scene-ripples" fill="none" stroke="'+ink+'" opacity=".24"><path d="M90 390q140-35 380 0M45 418q220-40 455-4M180 448q120-18 280-3"/></g>';
+    const leaves='<g class="scene-leaves"><g fill="none" stroke="'+ink+'" stroke-width="2" opacity=".65"><path d="M423 520q-10-146-75-256M468 510q-44-87-35-193"/></g><g fill="'+ink+'" opacity=".45"><path d="M397 408q-80-16-70-90 64 20 70 90M409 431q8-77 59-89 5 62-59 89M365 318q-50-18-48-61 44 8 48 61M446 430q-39-36-29-77 32 20 29 77"/></g></g>';
     let art='';
-    if(type==='moon')art='<circle cx="356" cy="134" r="65" fill="#fffbed"/><circle cx="356" cy="134" r="79" fill="none" stroke="#fffbed" opacity=".45"/>'+lake+leaves+'<path d="M244 237q10-9 20 0 9-9 18 0m-30 25q7-6 14 0 7-6 14 0" stroke="'+ink+'" stroke-width="2" fill="none" opacity=".65"/>';
+    if(type==='moon')art='<circle class="scene-light" cx="356" cy="134" r="65" fill="#fffbed"/><circle cx="356" cy="134" r="79" fill="none" stroke="#fffbed" opacity=".45"/>'+lake+leaves+'<path d="M244 237q10-9 20 0 9-9 18 0m-30 25q7-6 14 0 7-6 14 0" stroke="'+ink+'" stroke-width="2" fill="none" opacity=".65"/>';
     else if(type==='flower')art='<circle cx="360" cy="135" r="68" fill="#fbf4e6"/><path d="M515 510Q388 319 244 155M378 326l81-118M316 242l-76-10" stroke="#8f9b75" stroke-width="4" fill="none"/><g fill="#c99682" opacity=".72">'+[[269,190],[315,243],[393,287],[449,222],[361,331]].map(([x,y])=>'<g transform="translate('+x+' '+y+')"><ellipse rx="10" ry="23" transform="rotate(-38)"/><ellipse rx="10" ry="23" transform="rotate(38)"/><ellipse rx="10" ry="23" transform="rotate(90)"/><circle r="5" fill="#e6cbaa"/></g>').join('')+'</g><path d="M422 410q-75 5-83-63 56 1 83 63M295 214q-41 11-49-33 40-4 49 33" fill="#9aaa80" opacity=".75"/>';
-    else if(type==='rain'||type==='bamboo')art='<path d="M0 403Q160 369 520 407V500H0Z" fill="'+soft+'" opacity=".4"/>'+Array.from({length:3},(_,i)=>'<g stroke="'+ink+'" stroke-width="3" fill="none" opacity="'+(.4+i*.15)+'"><path d="M'+(320+i*60)+' 510l'+(15-i*17)+'-350"/><path d="M'+(326+i*56)+' 310l52-57m-52 57-54-30m54-90 42-40"/></g><g fill="'+ink+'" opacity=".5"><path d="M'+(330+i*55)+' 307q50-67 72-53-27 40-72 53m0 0q-48-46-65-32 32 31 65 32"/></g>').join('')+(type==='rain'?'<g stroke="#638e83" stroke-width="1" opacity=".3">'+Array.from({length:19},(_,i)=>'<path d="M'+(50+i*28)+' '+(30+i%4*45)+'l-20 95"/>').join('')+'</g>':'');
+    else if(type==='rain'||type==='bamboo')art='<path d="M0 403Q160 369 520 407V500H0Z" fill="'+soft+'" opacity=".4"/>'+Array.from({length:3},(_,i)=>'<g stroke="'+ink+'" stroke-width="3" fill="none" opacity="'+(.4+i*.15)+'"><path d="M'+(320+i*60)+' 510l'+(15-i*17)+'-350"/><path d="M'+(326+i*56)+' 310l52-57m-52 57-54-30m54-90 42-40"/></g><g fill="'+ink+'" opacity=".5"><path d="M'+(330+i*55)+' 307q50-67 72-53-27 40-72 53m0 0q-48-46-65-32 32 31 65 32"/></g>').join('')+(type==='rain'?'<g class="scene-rain" stroke="#638e83" stroke-width="1" opacity=".3">'+Array.from({length:19},(_,i)=>'<path d="M'+(50+i*28)+' '+(30+i%4*45)+'l-20 95"/>').join('')+'</g>':'');
     else if(type==='water')art='<circle cx="345" cy="110" r="40" fill="#f9f7e9"/><path d="M160 330q65-105 125-79t119-55 140 101v203H160Z" fill="'+soft+'" opacity=".48"/>'+lake+'<path d="M288 366h94l-18 15h-58Z" fill="'+ink+'"/><path d="M336 366v-69l42 59h-42" fill="#f9f6e9" stroke="'+ink+'" stroke-width="1.5"/><path d="M313 396h71" stroke="'+ink+'" opacity=".4"/>';
     else art='<circle cx="352" cy="115" r="46" fill="#fbf8e8"/><path d="M44 397 230 157q12-14 24 0l94 135 80-110 127 188v130H44Z" fill="'+soft+'" opacity=".6"/><path d="M90 458 306 246q15-16 28 2l195 185v67H90Z" fill="'+ink+'" opacity=".28"/><path d="M-20 478Q160 416 300 452T550 428v72H-20Z" fill="'+ink+'" opacity=".33"/>'+(type==='snow'?'<path d="m206 185 24-28q12-14 24 0l37 52-34-7-16-15-15 10Z" fill="#fffef8"/>'+Array.from({length:15},(_,i)=>'<circle cx="'+(180+i*43%330)+'" cy="'+(35+i*31%300)+'" r="3" fill="#fff"/>').join(''):leaves);
     return '<svg viewBox="0 0 520 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="'+id+'-sky" x2="0" y2="1"><stop stop-color="'+sky+'"/><stop offset="1" stop-color="#f7f6ed"/></linearGradient></defs><rect width="520" height="500" fill="url(#'+id+'-sky)"/>'+art+'</svg>';
@@ -371,10 +496,58 @@ return {validateLibrary};
     const lines=isLong?w.quote.map(i=>w.lines[i]):w.lines;
     return '<section class="reading-card" aria-label="此刻的作品"><div class="poem-cover"><div class="hero-copy"><p class="hero-meta">此刻，遇见一篇文字'+(isLong?' · 节选':'')+'</p><h2><a href="#work/'+esc(w.id)+'">'+esc(w.title)+'</a></h2><p class="byline">'+esc(a.dynasty)+' · '+esc(a.name)+'</p><div class="hero-verse">'+lines.map(l=>'<p>'+esc(l)+'</p>').join('')+'</div></div><div class="hero-art">'+scene(w.scene,'hero')+'</div><span class="art-seal">山月</span></div><div class="hero-actions"><a class="btn primary" href="#work/'+esc(w.id)+'">'+(isLong?'阅读全文':w.form.includes('古文')?'读这篇文字':'读这首诗')+' '+icon('arrow')+'</a><button class="text-btn shuffle" data-action="shuffle">'+icon('shuffle')+' 换一篇</button></div></section>';
   }
+  function excerpt(w, limit=72) {
+    const text=w.quote.slice(0,2).map(i=>w.lines[i]).filter(Boolean).join('\n')||w.lines[0]||'';
+    return text.length>limit?text.slice(0,limit).trimEnd()+'…':text;
+  }
+  function letterClue(w) {
+    return [...library.discovery.motifs,...library.discovery.feeling,...library.discovery.landscape].find(m=>w.tags.includes(m.tag))||{hint:w.form.split('·')[0].trim(),icon:'book'};
+  }
+  function prepareLetters(renew=false) {
+    if(!renew&&letters.length&&letters.every(id=>workById(id)))return;
+    const previous=new Set(letters);
+    let pool=library.works.filter(w=>!previous.has(w.id));
+    if(pool.length<Math.min(3,library.works.length))pool=[...library.works];
+    letters=[];openedLetter=null;
+    const seen=new Set();
+    while(pool.length&&letters.length<3){
+      const varied=pool.filter(w=>!seen.has(letterClue(w).hint)),choices=varied.length?varied:pool;
+      const w=choices[Math.floor(Math.random()*choices.length)];
+      letters.push(w.id);seen.add(letterClue(w).hint);pool=pool.filter(item=>item.id!==w.id);
+    }
+  }
+  function letterChoices() {
+    return letters.map((id,i)=>{
+      const w=workById(id),motif=letterClue(w),active=openedLetter===id;
+      return '<button class="poem-letter letter-'+i+'" data-action="open-letter" data-id="'+esc(id)+'" aria-expanded="'+active+'" aria-controls="letter-result" aria-label="拆开第'+(i+1)+'封诗笺：'+esc(motif?.hint||'字里行间')+'"><span class="letter-number">'+['壹','贰','叁'][i]+'</span><span class="letter-emblem">'+icon(motif?.icon||'book')+'</span><span class="letter-cue">'+esc(motif?.hint||'字里行间')+'</span><span class="letter-open">'+(active?'已展开':'轻点拆开')+'</span></button>';
+    }).join('');
+  }
+  function letterResult() {
+    const w=workById(openedLetter);
+    if(!w)return '<div class="letter-waiting"><span class="letter-postmark" aria-hidden="true">寄予此刻</span><p class="eyebrow">有些相遇，不必事先安排</p><h3>把一段闲暇，<br>交给偶然。</h3><p>选一封诗笺，看看哪一句<br>会在今天，轻轻叩响你的心。</p></div>';
+    const a=authorOf(w);
+    return '<div class="letter-revealed"><p class="eyebrow">这封诗笺，来自'+esc(a.name)+'</p><blockquote>'+esc(excerpt(w))+'</blockquote><p class="letter-source">'+esc(a.dynasty)+' · '+esc(a.name)+'《'+esc(w.title)+'》</p><div class="row"><a class="btn primary" href="#work/'+esc(w.id)+'">读这篇 '+icon('arrow')+'</a><button class="text-btn" data-action="share" data-id="'+esc(w.id)+'">'+icon('share')+' 做成诗卡</button></div></div>';
+  }
+  function letterRoom() {
+    prepareLetters();
+    return '<section class="letter-room" aria-labelledby="letter-heading"><div class="letter-desk"><div class="letter-heading"><div><p class="eyebrow">偶然读到，也是一种缘分</p><h2 id="letter-heading">拆一封诗笺</h2></div><button class="text-btn" data-action="new-letters">'+icon('shuffle')+' 换一组</button></div><div class="letter-choices">'+letterChoices()+'</div></div><div id="letter-result" class="letter-result" role="region" aria-label="诗笺内容">'+letterResult()+'</div><span id="letter-announcement" class="sr-only" role="status" aria-live="polite"></span></section>';
+  }
+  function openLetter(id) {
+    if(!letters.includes(id)||!workById(id)||openedLetter===id)return;
+    openedLetter=id;
+    $$('.poem-letter').forEach(b=>{const active=b.dataset.id===id;b.setAttribute('aria-expanded',String(active));$('.letter-open',b).textContent=active?'已展开':'轻点拆开';});
+    const result=$('#letter-result');result.innerHTML=letterResult();Experience.unfold(result.firstElementChild);
+    const w=workById(id);$('#letter-announcement').textContent='已拆开《'+w.title+'》，'+authorOf(w).name+'。'+excerpt(w);
+  }
+  function readingTrail(w) {
+    const related=(w.related||[]).filter(r=>r.id!==w.id&&workById(r.id)).slice(0,2);
+    if(!related.length)return '';
+    return '<section class="reader-trail" aria-labelledby="trail-heading"><p class="eyebrow">读到这里，也许还想走远一点</p><h2 id="trail-heading">下一站，字里山河</h2><div class="trail-cards">'+related.map((r,i)=>{const next=workById(r.id);return '<a class="trail-card" href="#work/'+esc(next.id)+'"><span class="trail-art">'+scene(next.scene,'trail'+i)+'</span><span class="trail-copy"><span class="trail-meta">'+esc(authorOf(next).name)+' · '+esc(next.form)+'</span><h3>'+esc(next.title)+'</h3><span class="trail-quote">'+esc(excerpt(next,44))+'</span><span class="trail-reason">'+esc(r.reason)+'</span><span class="trail-go">继续读 '+icon('arrow')+'</span></span></a>';}).join('')+'</div></section>';
+  }
   function home() {
     const motifs=library.discovery.motifs;
     const topic=library.topics[0];
-    return '<h1 class="sr-only">山月 · 遇见文字里的天地</h1><div class="home-stage">'+readingCard()+'<section class="home-paths"><div class="desktop-intro"><p class="eyebrow">不赶路的时候</p><h2>留一点时间，<br>给眼前的诗。</h2><p>从一轮月、一阵风，走进心里的远方。</p></div><div class="discovery-entries"><a href="#explore" class="discovery-entry"><strong>按风景找</strong><span>月色、花事、山川</span>'+icon('arrow')+'</a><a href="#explore?view=feeling" class="discovery-entry"><strong>按心情找</strong><span>思念、闲适、旷达</span>'+icon('arrow')+'</a></div>'+(topic?'<a class="editorial-link" href="#explore?topic='+encodeURIComponent(topic.id)+'"><span class="editorial-mark">'+esc(library.discovery.featuredMark)+'</span><span><strong>'+esc(topic.name)+'</strong><small>'+esc(topic.subtitle)+'</small></span>'+icon('arrow')+'</a>':'')+'</section></div><section><div class="section-heading"><div><p class="eyebrow">诗里的风景</p><h2>你想走近哪一处？</h2></div><a class="text-btn" href="#explore">全部线索 '+icon('arrow')+'</a></div><div class="motifs">'+motifs.filter(c=>tagById(c.tag)).map(({tag:id,label:name,hint:note,icon:iconName})=>'<button class="motif" data-action="tag" data-id="'+id+'"><span class="motif-orb">'+icon(iconName)+'</span><span class="motif-name">'+esc(name)+'<span class="motif-note">'+esc(note)+'</span></span></button>').join('')+'</div></section><section><div class="section-heading"><div><p class="eyebrow">一组文字，一次漫游</p><h2>走一条诗里的小径</h2></div></div><div class="topics">'+library.topics.map((t,i)=>'<a class="topic-card topic-'+i+'" href="#explore?topic='+encodeURIComponent(t.id)+'"><div class="topic-art">'+scene(t.scene,'topic'+i)+'</div><div class="topic-copy"><span class="topic-kicker">诗意小集</span><h3>'+esc(t.name)+'</h3><p>'+esc(t.subtitle)+'</p><span class="topic-arrow">'+icon('arrow')+'</span></div></a>').join('')+'</div></section><section><div class="section-heading"><h2>不妨，再读一篇</h2><a class="text-btn" href="#explore">全部作品 '+icon('arrow')+'</a></div><div class="work-grid home-recommendations">'+library.works.filter(w=>w.id!==currentHome).slice(0,3).map(tile).join('')+'</div></section>';
+    return '<h1 class="sr-only">山月 · 遇见文字里的天地</h1><div class="home-stage">'+readingCard()+'<section class="home-paths"><div class="desktop-intro"><p class="eyebrow">不赶路的时候</p><h2>留一点时间，<br>给眼前的诗。</h2><p>从一轮月、一阵风，走进心里的远方。</p></div><div class="discovery-entries"><a href="#explore" class="discovery-entry"><strong>按风景找</strong><span>月色、花事、山川</span>'+icon('arrow')+'</a><a href="#explore?view=feeling" class="discovery-entry"><strong>按心情找</strong><span>思念、闲适、旷达</span>'+icon('arrow')+'</a></div>'+(topic?'<a class="editorial-link" href="#explore?topic='+encodeURIComponent(topic.id)+'"><span class="editorial-mark">'+esc(library.discovery.featuredMark)+'</span><span><strong>'+esc(topic.name)+'</strong><small>'+esc(topic.subtitle)+'</small></span>'+icon('arrow')+'</a>':'')+'</section></div><section><div class="section-heading"><div><p class="eyebrow">诗里的风景</p><h2>你想走近哪一处？</h2></div><a class="text-btn" href="#explore">全部线索 '+icon('arrow')+'</a></div><div class="motifs">'+motifs.filter(c=>tagById(c.tag)).map(({tag:id,label:name,hint:note,icon:iconName})=>'<button class="motif" data-action="tag" data-id="'+id+'"><span class="motif-orb">'+icon(iconName)+'</span><span class="motif-name">'+esc(name)+'<span class="motif-note">'+esc(note)+'</span></span></button>').join('')+'</div></section>'+letterRoom()+'<section><div class="section-heading"><div><p class="eyebrow">一组文字，一次漫游</p><h2>走一条诗里的小径</h2></div></div><div class="topics">'+library.topics.map((t,i)=>'<a class="topic-card topic-'+i+'" href="#explore?topic='+encodeURIComponent(t.id)+'"><div class="topic-art">'+scene(t.scene,'topic'+i)+'</div><div class="topic-copy"><span class="topic-kicker">诗意小集</span><h3>'+esc(t.name)+'</h3><p>'+esc(t.subtitle)+'</p><span class="topic-arrow">'+icon('arrow')+'</span></div></a>').join('')+'</div></section><section><div class="section-heading"><h2>不妨，再读一篇</h2><a class="text-btn" href="#explore">全部作品 '+icon('arrow')+'</a></div><div class="work-grid home-recommendations">'+library.works.filter(w=>w.id!==currentHome).slice(0,3).map(tile).join('')+'</div></section>';
   }
   async function shuffleWork() {
     const version=++shuffleVersion,route=routeVersion,old=$('.reading-card'),scroll=window.scrollY;
@@ -382,14 +555,16 @@ return {validateLibrary};
     if(shuffleAnimation)shuffleAnimation.cancel();
     let candidates=library.works.filter(w=>!recentHome.slice(-4).includes(w.id));if(!candidates.length)candidates=library.works;
     const w=candidates[Math.floor(Math.random()*candidates.length)];
-    if(!reducedMotion()){shuffleAnimation=old.querySelector('.poem-cover').animate([{opacity:1,transform:'none'},{opacity:0,transform:'translateX(-18px) rotate(-.8deg)'}],{duration:140,easing:'ease-in'});await shuffleAnimation.finished.catch(()=>{});}
+    shuffleAnimation=Experience.play(old.querySelector('.poem-cover'),[{opacity:1,transform:'none'},{opacity:0,transform:'perspective(1000px) rotateY(-7deg) translateX(-14px)'}],{duration:170,easing:'ease-in'});
+    if(shuffleAnimation)await shuffleAnimation.finished.catch(()=>{});
     if(version!==shuffleVersion||route!==routeVersion)return;
     currentHome=w.id;state.lastWork=w.id;recentHome.push(w.id);persist();
     const holder=document.createElement('div');holder.innerHTML=readingCard();old.replaceWith(holder.firstElementChild);
     $('.shuffle').focus({preventScroll:true});
     window.scrollTo({top:scroll,behavior:'auto'});
     requestAnimationFrame(()=>{if(version===shuffleVersion&&route===routeVersion)window.scrollTo({top:scroll,behavior:'auto'});});
-    if(!reducedMotion())$('.poem-cover').animate([{opacity:0,transform:'translateX(18px) rotate(.8deg)'},{opacity:1,transform:'none'}],{duration:210,easing:'cubic-bezier(.2,.7,.2,1)'});
+    Experience.play($('.poem-cover'),[{opacity:.15,transform:'perspective(1000px) rotateY(7deg) translateX(14px)'},{opacity:1,transform:'none'}],{duration:330});
+    Experience.scene($('.hero-art'));
   }
 
   function rootTag(id) { let tag=tagById(id),n=0;while(tag&&tag.parent&&n++<30)tag=tagById(tag.parent);return tag?tag.id:id; }
@@ -477,7 +652,7 @@ return {validateLibrary};
   function detail(w) {
     const a=authorOf(w),isProse=w.form.includes('古文'),open=expanded.get(w.id)||[];
     const teaser=w.reading[0],showTeaser=teaser&&library.modules.some(m=>m.id==='reading'&&m.enabled);
-    return '<div class="reader-top"><div class="breadcrumb"><a href="'+esc(lastListing)+'">'+icon('back')+' 返回'+(lastListing.startsWith('#explore')?'发现':lastListing.startsWith('#saved')?'收藏':'遇见')+'</a></div><button class="text-btn" data-action="settings">'+icon('sliders')+' 阅读设置</button></div><div class="detail-layout"><article class="poem-page"><header class="detail-heading"><p class="eyebrow">在字里行间，停一停</p><h1>'+esc(w.title)+'</h1><p class="byline">'+esc(a.dynasty)+' · <a href="#explore?author='+encodeURIComponent(w.author)+'">'+esc(a.name)+'</a> · '+esc(w.form)+'</p></header>'+(w.preface?'<p class="work-preface">'+esc(w.preface)+'</p>':'')+'<div class="poem-lines '+(isProse?'prose':'')+'">'+w.lines.map((line,i)=>'<button class="verse-line" data-action="line" data-id="'+esc(w.id)+'" data-line="'+i+'" aria-expanded="false" aria-controls="line-note" aria-label="查看这句：'+esc(line)+'">'+annotatedLine(line,w.notes)+'</button>').join('')+'</div>'+(!state.hintDismissed?'<div class="poem-hint"><span>轻点字词或诗句，读一处解释。</span><button class="text-btn" data-action="dismiss-hint" aria-label="不再显示阅读提示">知道了</button></div>':'')+'<div id="line-note"></div><div class="detail-actions">'+favoriteButton(w)+'<button class="btn primary" data-action="share" data-id="'+esc(w.id)+'">'+icon('share')+' 选句制作诗卡</button></div>'+(showTeaser?'<section class="reading-invitation"><p class="eyebrow">再读一层</p><h2>'+esc(teaser.title)+'</h2><p>'+esc(teaser.quote)+'</p><button class="text-btn" data-action="read-insight">看看这一处的妙处 '+icon('arrow')+'</button></section>':'')+'<div class="details-modules">'+library.modules.filter(m=>m.enabled).map(m=>{const c=moduleContent(w,m);return c?'<details class="content-module" data-module="'+esc(m.id)+'" '+(open.includes(m.id)?'open':'')+'><summary>'+esc(m.label)+'</summary><div class="module-body">'+c+'</div></details>':'';}).join('')+'</div></article><aside class="detail-aside"><div class="aside-art">'+scene(w.scene,'detail')+'</div><h2>沿着这些线索</h2><div class="tag-list">'+w.tags.map(tagButton).join('')+'</div><h2>诗意，还有回响</h2>'+(w.related||[]).filter(r=>workById(r.id)).map(r=>'<a class="related-item" href="#work/'+esc(r.id)+'"><h3>'+esc(workById(r.id).title)+' '+icon('arrow')+'</h3><p>'+esc(r.reason)+'</p></a>').join('')+(w.stage.length?'<p class="stage-note">学段标签'+w.stage.map(s=>'<span>'+esc(s)+'</span>').join('')+'</p>':'')+'</aside></div>';
+    return '<div class="reader-top"><div class="breadcrumb"><a href="'+esc(lastListing)+'">'+icon('back')+' 返回'+(lastListing.startsWith('#explore')?'发现':lastListing.startsWith('#saved')?'收藏':'遇见')+'</a></div><button class="text-btn" data-action="settings">'+icon('sliders')+' 阅读设置</button></div><div class="detail-layout"><article class="poem-page"><header class="detail-heading"><p class="eyebrow">在字里行间，停一停</p><h1>'+esc(w.title)+'</h1><p class="byline">'+esc(a.dynasty)+' · <a href="#explore?author='+encodeURIComponent(w.author)+'">'+esc(a.name)+'</a> · '+esc(w.form)+'</p></header>'+(w.preface?'<p class="work-preface">'+esc(w.preface)+'</p>':'')+'<div class="poem-lines '+(isProse?'prose':'')+'">'+w.lines.map((line,i)=>'<button class="verse-line" data-action="line" data-id="'+esc(w.id)+'" data-line="'+i+'" aria-expanded="false" aria-controls="line-note" aria-label="查看这句：'+esc(line)+'">'+annotatedLine(line,w.notes)+'</button>').join('')+'</div>'+(!state.hintDismissed?'<div class="poem-hint"><span>轻点字词或诗句，读一处解释。</span><button class="text-btn" data-action="dismiss-hint" aria-label="不再显示阅读提示">知道了</button></div>':'')+'<div id="line-note"></div><div class="detail-actions">'+favoriteButton(w)+'<button class="btn primary" data-action="share" data-id="'+esc(w.id)+'">'+icon('share')+' 选句制作诗卡</button></div>'+(showTeaser?'<section class="reading-invitation"><p class="eyebrow">再读一层</p><h2>'+esc(teaser.title)+'</h2><p>'+esc(teaser.quote)+'</p><button class="text-btn" data-action="read-insight">看看这一处的妙处 '+icon('arrow')+'</button></section>':'')+'<div class="details-modules">'+library.modules.filter(m=>m.enabled).map(m=>{const c=moduleContent(w,m);return c?'<details class="content-module" data-module="'+esc(m.id)+'" '+(open.includes(m.id)?'open':'')+'><summary>'+esc(m.label)+'</summary><div class="module-body">'+c+'</div></details>':'';}).join('')+'</div>'+readingTrail(w)+'</article><aside class="detail-aside"><div class="aside-art">'+scene(w.scene,'detail')+'</div><h2>沿着这些线索</h2><div class="tag-list">'+w.tags.map(tagButton).join('')+'</div>'+(w.stage.length?'<p class="stage-note">学段标签'+w.stage.map(s=>'<span>'+esc(s)+'</span>').join('')+'</p>':'')+'</aside></div>';
   }
   function showLine(id,index,toggle=false) {
     const w=workById(id);if(!w||!w.lines[index])return;
@@ -506,7 +681,7 @@ return {validateLibrary};
     if(id)expanded.set(id,$$('.content-module[open]').map(d=>d.dataset.module));
   }
   function renderRoute(animate=true) {
-    clearTimeout(searchTimer);clearTimeout(shareTimer);
+    clearTimeout(searchTimer);clearTimeout(shareTimer);Experience.clear();
     const hash=location.hash||'#home';rememberView();
     const [route,query='']=hash.slice(1).split('?'),params=new URLSearchParams(query);
     if(['home','explore','saved'].includes(route))lastListing=hash;
@@ -526,6 +701,7 @@ return {validateLibrary};
     document.body.dataset.page=route.startsWith('card/')?'card':route.startsWith('work/')?'work':route;
     document.body.dataset.longReading=String(!!work&&(work.form.includes('古文')||work.lines.length>8));
     $('#app').innerHTML='<div'+(animate?' class="fade-in"':'')+'>'+html+'</div>';
+    Experience.observe($('#app'));Experience.scene($('.hero-art')||$('.aside-art'));
     const section=route.startsWith('work/')||route.startsWith('card/')?lastListing.slice(1).split('?')[0]:route;
     $$('[data-nav]').forEach(a=>{const active=a.dataset.nav===(['explore','saved'].includes(section)?section:'home');a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
     document.title=work?work.title+' · 山月':route.startsWith('card/')?'制作诗卡 · 山月':'山月 · 在字里行间，遇见天地';
@@ -781,7 +957,7 @@ return {validateLibrary};
     const has=state.favorites.includes(id);state.favorites=has?state.favorites.filter(x=>x!==id):[id,...state.favorites];persist();
     if(location.hash.startsWith('#saved'))refreshPage();
     else $$('[data-action="favorite"]').filter(b=>b.dataset.id===id).forEach(b=>{b.classList.toggle('is-saved',!has);b.classList.toggle('active',!has);b.setAttribute('aria-pressed',String(!has));b.setAttribute('aria-label',(has?'收藏':'取消收藏')+w.title);b.innerHTML=icon('heart')+(b.classList.contains('btn')?(has?'收藏':'已收藏'):'');});
-    if(!reducedMotion())$$('[data-action="favorite"]').filter(b=>b.dataset.id===id).forEach(b=>b.animate([{transform:'scale(.94)'},{transform:'scale(1.06)'},{transform:'none'}],{duration:220}));
+    if(!has)$$('[data-action="favorite"]').filter(b=>b.dataset.id===id).forEach(b=>Experience.stamp(b));
     toast(has?'已移出收藏。':'已把这篇文字留在收藏里。',()=>{state.favorites=state.favorites.filter(x=>x!==id);if(has)state.favorites.unshift(id);persist();refreshPage();});
   }
   function saveQuote(id,index) {
@@ -789,7 +965,7 @@ return {validateLibrary};
     const existed=state.quotes.find(q=>q.workId===id&&q.index===index);
     if(existed)state.quotes=state.quotes.filter(q=>q.id!==existed.id);
     else state.quotes.push({id:id+'-'+index,workId:id,index,text:w.lines[index],title:w.title,author:authorOf(w).name,dynasty:authorOf(w).dynasty});
-    persist();showLine(id,index);toast(existed?'已移出句子收藏。':'这一句，留下了。');
+    persist();showLine(id,index);const button=$('[data-action="save-quote"]');button?.focus({preventScroll:true});if(!existed)Experience.stamp(button);toast(existed?'已移出句子收藏。':'这一句，留下了。');
   }
   const recentHome=[currentHome];
   document.addEventListener('click',event=>{
@@ -807,16 +983,18 @@ return {validateLibrary};
         case 'explore-view':explore.view=id;$$('[data-action="explore-view"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));$('#discovery-cards').dataset.view=explore.view;$('#discovery-cards').innerHTML=discoveryCards();filterChanged();break;
         case 'backup-settings':settings();$$('.settings-group',dialog).filter(x=>x.tagName==='DETAILS')[2].open=true;break;
         case 'dismiss-hint':state.hintDismissed=true;persist();$('.poem-hint')?.remove();break;
-        case 'read-insight':{const module=$('[data-module="reading"]');if(module){module.open=true;module.scrollIntoView({block:'start',behavior:reducedMotion()?'auto':'smooth'});}break;}
+        case 'read-insight':{const module=$('[data-module="reading"]');if(module){module.open=true;Experience.unfold($('.module-body',module));module.scrollIntoView({block:'start',behavior:reducedMotion()?'auto':'smooth'});}break;}
         case 'share-tool':setShareTool(id,b.id==='adjust-quotes');break;
         case 'zoom-card':if(share?.dataUrl){openModal('长按图片，保存这一页','<img class="full-card-preview" src="'+share.dataUrl+'" alt="'+esc(share.title)+'诗卡">',true);}break;
         case 'about':about();break;
         case 'settings':settings();break;
         case 'search':if($('#search')){$('#search').focus();$('#search').scrollIntoView({block:'center',behavior:'auto'});}else{focusSearch=true;location.hash='#explore';}break;
+        case 'open-letter':openLetter(id);break;
+        case 'new-letters':prepareLetters(true);$('.letter-choices').innerHTML=letterChoices();$('#letter-result').innerHTML=letterResult();$('#letter-announcement').textContent='新的诗笺已备好，选一封拆开吧。';Experience.unfold($('.letter-choices'));break;
         case 'shuffle':shuffleWork();break;
         case 'favorite':toggleFavorite(id);break;
         case 'tag':location.hash='#explore?tag='+encodeURIComponent(id)+(rootTag(id)==='geography'?'&view=places':'');break;
-        case 'filter':explore.tags=explore.tags.includes(id)?explore.tags.filter(x=>x!==id):[...explore.tags,id];filterChanged();break;
+        case 'filter':explore.tags=explore.tags.includes(id)?explore.tags.filter(x=>x!==id):[...explore.tags,id];filterChanged();if(b.getAttribute('aria-pressed')==='true'){Experience.play(b,[{transform:'scale(.97)'},{transform:'none'}]);Experience.scene($('.discovery-art',b));}break;
         case 'clear-topic':explore.topic='';filterChanged();break;
         case 'clear-filters':explore={search:'',tags:[],author:'',form:'',stage:'',topic:'',view:explore.view};$('#search').value='';['author','form','stage'].forEach(key=>{const field=$('#'+key+'-filter');if(field)field.value='';});filterChanged();break;
         case 'clear-search':explore.search='';$('#search').value='';filterChanged();$('#search').focus({preventScroll:true});break;
