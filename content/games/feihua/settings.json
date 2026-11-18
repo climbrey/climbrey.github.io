@@ -1,0 +1,13 @@
+{
+  "rounds": 6,
+  "words": [
+    {"char": "花", "caption": "花间小坐"},
+    {"char": "月", "caption": "邀月作伴"},
+    {"char": "山", "caption": "与山相逢"},
+    {"char": "水", "caption": "沿水听诗"},
+    {"char": "风", "caption": "风过有声"},
+    {"char": "雨", "caption": "檐下听雨"},
+    {"char": "雪", "caption": "雪中寄句"},
+    {"char": "春", "caption": "春日来信"}
+  ]
+}

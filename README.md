@@ -35,7 +35,7 @@ python -m http.server 8767 --bind 127.0.0.1 --directory site
 
 打开 http://127.0.0.1:8767/ 。手机可直接访问线上地址，在浏览器菜单中添加到主屏幕。收藏和设置保存在当前浏览器，可通过页面内的个人备份导入导出迁移。
 
-“游园”入口为 `#play`，两款游戏分别为 `#play/compose`（拾句成诗）、`#play/scenes`（诗境解谜 · 荷塘来信）。拾句进度在当前页面会话内保留；荷塘来信自动保存到当前浏览器，并随个人备份迁移。旧备份不覆盖未包含的游戏进度。
+“游园”入口为 `#play`，三款游戏分别为 `#play/feihua`（飞花令 · 和山月接诗）、`#play/compose`（拾句成诗）、`#play/scenes`（诗境解谜 · 荷塘来信）。拾句进度在当前页面会话内保留；飞花令与荷塘来信自动保存到当前浏览器，并随个人备份迁移。旧备份不覆盖未包含的游戏进度。
 
 ## 测试
 
@@ -52,6 +52,7 @@ python tests/experience_smoke.py
 python tests/puzzle_smoke.py
 python tests/mystery_smoke.py
 python tests/mystery_motion.py
+python tests/feihua_smoke.py
 python tests/pwa_smoke.py
 python tests/pwa_smoke.py --root
 ```

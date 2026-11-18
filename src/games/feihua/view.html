@@ -1,0 +1,29 @@
+<section class="feihua-main"><div class="page">
+  <header class="topbar"><a href="#play" class="back">← 返回游园</a><div class="top-actions"><button id="restart" class="quiet">重新开始</button><button id="motion" class="quiet" aria-pressed="false">静止画面</button><button id="rules" class="quiet">怎么玩</button></div></header>
+  <section class="heading"><div><p class="eyebrow">山月游园 · 一字一相逢</p><h1>飞花令<span>和山月接诗</span></h1></div><p class="opening">你想起一句，我再接一句。<br>让诗里的风景，慢慢开花。</p></section>
+  <nav class="themes" aria-label="选择一个令字"></nav>
+  <main class="play-layout">
+    <section class="garden" aria-label="随接诗逐渐开花的画面">
+      <div class="garden-top"><span id="garden-caption">花间小坐</span><span id="round-label">等第一句诗</span></div>
+      <div id="landscape"></div><div id="touch-effects" aria-hidden="true"></div>
+      <div class="command"><span>今 日 飞 花</span><strong id="word">花</strong><small>一句里，有这个字就好</small></div>
+      <div class="garden-bottom"><span id="garden-note">轻点水面，也有回响。</span><div id="buds" aria-label="已完成零次往来"></div></div>
+    </section>
+    <section class="conversation" aria-label="接诗">
+      <div class="conversation-heading"><div><span class="status-dot"></span><span id="turn-label">山月在这里，等你一句</span></div><button id="finish" class="text-button" hidden>收成诗笺 ↗</button></div>
+      <div id="verses" role="log" aria-label="接诗记录" aria-live="polite" aria-relevant="additions"></div>
+      <div id="welcome" class="welcome"><div class="welcome-mark">「</div><h2>第一句，从熟悉的开始。</h2><p>想起一句带“<b class="current-word">花</b>”的诗就写下来。<br>一时想不起来，也可以借一点灵感。</p><button id="first-hint" class="welcome-hint">借一点灵感 <span>↗</span></button></div>
+      <section id="hint-panel" class="hint-panel" aria-label="接诗提示" hidden></section>
+      <section id="rest-panel" class="rest-panel" hidden><span class="eyebrow">一场小小的相逢</span><h2 id="rest-title">花开得正好。</h2><p id="rest-description"></p><div><button id="save-rest" class="primary">收成诗笺</button><button id="continue" class="secondary">还想再接</button><button id="new-word" class="text-button">换一个字</button></div></section>
+      <form id="composer" novalidate>
+        <label for="verse-input">接一句带“<b class="current-word">花</b>”的诗</label>
+        <div class="input-wrap"><input id="verse-input" name="verse" autocomplete="off" enterkeyhint="send" placeholder="把想起的那句写在这里…" maxlength="60"><button type="submit" id="send" aria-label="送出诗句">送出 <span>↗</span></button></div>
+        <div id="feedback" role="status" aria-live="polite"></div>
+        <div class="compose-actions"><button type="button" id="hint" class="text-button">✧ 借个提示</button><span>不计时，慢慢想。</span></div>
+      </form>
+    </section>
+  </main>
+  <footer>山月的每一句回应，都来自诗集。<span>初版先接五言、七言诗句。</span></footer>
+</div>
+<dialog id="feihua-modal" aria-labelledby="modal-title"><div class="modal-header"><h2 id="modal-title"></h2><button id="close" class="quiet" aria-label="关闭弹窗">关闭 ×</button></div><div id="modal-body"></div></dialog>
+</section>
