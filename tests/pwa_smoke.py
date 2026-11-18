@@ -104,6 +104,20 @@ with sync_playwright() as p:
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     assert not errors,errors
     print('PASS: homescreen start URL works offline with no script errors',flush=True)
+    page.goto(URL+'index.html?source=homescreen#play')
+    expect(page.locator('.puzzle-page')).to_be_visible()
+    page.reload()
+    for _ in range(6):
+        if page.locator('.puzzle-complete').is_visible():break
+        page.locator('[data-puzzle="hint"]').click()
+    expect(page.locator('.puzzle-complete')).to_be_visible()
+    page.locator('[data-puzzle="share"]').click()
+    expect(page.locator('#share-image')).to_be_visible()
+    with page.expect_download() as downloaded:
+        page.locator('[data-action="download-image"]').click()
+    downloaded.value.save_as(str(OUT/'pwa-offline-game.png'))
+    assert not errors,errors
+    print('PASS: game route reloads offline, completes and exports the composed couplet',flush=True)
     browser.close()
 server.shutdown()
 server.server_close()
