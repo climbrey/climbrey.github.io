@@ -104,7 +104,7 @@ with sync_playwright() as p:
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     assert not errors,errors
     print('PASS: homescreen start URL works offline with no script errors',flush=True)
-    page.goto(URL+'index.html?source=homescreen#play')
+    page.goto(URL+'index.html?source=homescreen#play/compose')
     expect(page.locator('.puzzle-page')).to_be_visible()
     page.reload()
     for _ in range(6):
@@ -118,6 +118,23 @@ with sync_playwright() as p:
     downloaded.value.save_as(str(OUT/'pwa-offline-game.png'))
     assert not errors,errors
     print('PASS: game route reloads offline, completes and exports the composed couplet',flush=True)
+    page.goto(URL+'index.html?source=homescreen#play/scenes')
+    expect(page.locator('.scene-tab')).to_have_count(3)
+    page.reload()
+    page.locator('#reveal').click()
+    expect(page.locator('#discovery')).to_be_visible()
+    page.locator('#save').click()
+    expect(page.locator('.scene-poster')).to_be_visible()
+    with page.expect_download() as downloaded:
+        page.locator('.scene-download').click()
+    downloaded.value.save_as(str(OUT/'pwa-offline-scene.png'))
+    close_surface(page)
+    page.locator('#read').click()
+    expect(page.locator('.detail-heading h1')).to_have_text('小池')
+    page.locator('.breadcrumb a').click()
+    expect(page.locator('#discovery')).to_be_visible()
+    assert not errors,errors
+    print('PASS: illustrated scenes reload offline, export PNG and retain original-reading return',flush=True)
     browser.close()
 server.shutdown()
 server.server_close()

@@ -1,0 +1,69 @@
+{
+  "id": "pond",
+  "name": "池边停一停",
+  "stamp": "一角新生",
+  "alt": "浅绿的池塘里，几片荷叶浮在水面，一枚卷起的新荷尖上停着一只蜻蜓。",
+  "clues": [
+    {
+      "name": "看看荷叶",
+      "text": "这片荷叶才冒出水面，还卷着一个小小的尖角。",
+      "x": 65,
+      "y": 59,
+      "tx": 53.5,
+      "ty": 55,
+      "target": "lotus"
+    },
+    {
+      "name": "谁先来了",
+      "text": "蜻蜓没有飞远，轻轻停在新荷的尖上。",
+      "x": 65,
+      "y": 33,
+      "tx": 53,
+      "ty": 37,
+      "target": "dragonfly"
+    }
+  ],
+  "answer": "xiaochi",
+  "options": [
+    {
+      "workId": "xiaochujingcisisonglinzifang",
+      "lines": [
+        2,
+        3
+      ],
+      "response": "也有荷。这两句展开的是满湖碧叶与红花；眼前的荷还小，花也未开。",
+      "authorId": "yangwanli",
+      "expected": [
+        "接天莲叶无穷碧，",
+        "映日荷花别样红。"
+      ]
+    },
+    {
+      "workId": "xiaochi",
+      "lines": [
+        2,
+        3
+      ],
+      "response": "新荷的尖角、停落的蜻蜓，恰好在这两句里相逢。",
+      "authorId": "yangwanli",
+      "expected": [
+        "小荷才露尖尖角，",
+        "早有蜻蜓立上头。"
+      ]
+    },
+    {
+      "workId": "jiangnan",
+      "lines": [
+        1,
+        2
+      ],
+      "response": "也写荷叶。这两句里有游鱼穿行；画里更值得留意的是荷尖上的小客人。",
+      "authorId": "hanyuefu",
+      "expected": [
+        "莲叶何田田。",
+        "鱼戏莲叶间。"
+      ]
+    }
+  ],
+  "reading": "“才露”与“早有”靠得很近：新荷刚刚出现，蜻蜓已经先到。诗人把池塘里一个小小的瞬间，写得像一次轻巧的相逢。"
+}

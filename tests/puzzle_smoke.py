@@ -35,6 +35,7 @@ with sync_playwright() as p:
     page.goto(URL)
     expect(page.locator('.puzzle-entry')).to_be_visible()
     page.locator('.mobile-nav [data-nav="play"]').click()
+    page.locator('.garden-card[href="#play/compose"]').click()
     expect(page.locator('#puzzle-title')).to_have_text('拾句成诗')
     expect(page.locator('.mobile-nav [data-nav="play"]')).to_have_attribute('aria-current','page')
     expect(page.locator('.puzzle-source h2')).to_have_text('鸟鸣涧')
@@ -93,7 +94,7 @@ with sync_playwright() as p:
     expect(page.locator('.puzzle-slot.is-filled')).to_have_count(0)
     for width in [320,390,768,1440]:
         page.set_viewport_size({'width':width,'height':900 if width>700 else 844})
-        page.goto(URL+'#play')
+        page.goto(URL+'#play/compose')
         settle(page)
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), width
         for box in page.locator('.puzzle-piece').evaluate_all('els => els.map(el => {const r=el.getBoundingClientRect(); return {x:r.x,right:r.right,w:r.width,h:r.height};})'):
@@ -102,7 +103,7 @@ with sync_playwright() as p:
             page.screenshot(path=str(OUT/'desktop-play.png'), full_page=True)
         page.goto(URL+'#home')
         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), width
-    page.goto(URL+'#play')
+    page.goto(URL+'#play/compose')
     page.emulate_media(reduced_motion='reduce')
     finish(page)
     settle(page)
@@ -134,7 +135,7 @@ with sync_playwright() as p:
     narrow.write_text(re.sub(r'(<script id="library-data" type="application/json">).*?(</script>)',lambda m:m[1]+payload+m[2],html,flags=re.S),encoding='utf-8')
     seven_page = browser.new_page(viewport={'width':320,'height':740},reduced_motion='reduce')
     seven_page.on('pageerror',lambda error:errors.append(str(error)))
-    seven_page.goto(narrow.as_uri()+'#play')
+    seven_page.goto(narrow.as_uri()+'#play/compose')
     expect(seven_page.locator('.puzzle-piece')).to_have_count(6)
     finish(seven_page)
     assert seven_page.evaluate('document.documentElement.scrollWidth <= innerWidth')
@@ -152,7 +153,7 @@ with sync_playwright() as p:
     empty.write_text(html,encoding='utf-8')
     solo=browser.new_page(viewport={'width':320,'height':740}, reduced_motion='reduce')
     solo.on('pageerror',lambda error:errors.append(str(error)))
-    solo.goto(empty.as_uri()+'#play')
+    solo.goto(empty.as_uri()+'#play/compose')
     expect(solo.locator('.puzzle-empty')).to_be_visible()
     solo.locator('.puzzle-empty a').click()
     expect(solo.locator('.work-tile')).to_have_count(1)

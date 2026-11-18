@@ -3,11 +3,6 @@
   const Model=root.ShanyuePuzzle;
   let session=null,recent=[];
   const esc=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const gardenIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V11a8 8 0 0 1 16 0v10M2 21h20M8 21v-9a4 4 0 0 1 8 0v9M12 3v5M4.5 8l4 2M19.5 8l-4 2"/></svg>';
-  function entry(library){
-    const round=Model.collect(library.works)[0];if(!round)return '';
-    return '<a class="puzzle-entry" href="#play"><span class="puzzle-entry-icon">'+gardenIcon+'</span><span class="puzzle-entry-copy"><span class="eyebrow">游园 · 诗意小游戏</span><strong>拾起几片字，拼出一幅诗。</strong><span>轻点碎片，让散落的诗句重新相逢。</span></span><span class="puzzle-entry-go">去玩一会儿 <span aria-hidden="true">↗</span></span></a>';
-  }
   function prepare(library,renew=false){
     const rounds=Model.collect(library.works);
     if(!rounds.length){session=null;return null;}
@@ -77,5 +72,5 @@
       }
     };
   }
-  root.ShanyuePuzzleView={entry,markup,mount};
+  root.ShanyuePuzzleView={markup,mount};
 })(globalThis);

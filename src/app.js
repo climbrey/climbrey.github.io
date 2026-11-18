@@ -8,6 +8,7 @@
   const Personal = ShanyuePersonal;
   const Experience = ShanyueExperience;
   const PuzzleView = ShanyuePuzzleView;
+  const SceneView = ShanyueSceneView;
   let letters = [], openedLetter = null;
   const SEED = ShanyueLibrary.validateLibrary(JSON.parse($('#library-data').textContent));
   const seedFingerprints = Personal.fingerprints(SEED);
@@ -158,7 +159,7 @@
   function home() {
     const motifs=library.discovery.motifs;
     const topic=library.topics[0];
-    return '<h1 class="sr-only">山月 · 遇见文字里的天地</h1><div class="home-stage">'+readingCard()+'<section class="home-paths"><div class="desktop-intro"><p class="eyebrow">不赶路的时候</p><h2>留一点时间，<br>给眼前的诗。</h2><p>从一轮月、一阵风，走进心里的远方。</p></div><div class="discovery-entries"><a href="#explore" class="discovery-entry"><strong>按风景找</strong><span>月色、花事、山川</span>'+icon('arrow')+'</a><a href="#explore?view=feeling" class="discovery-entry"><strong>按心情找</strong><span>思念、闲适、旷达</span>'+icon('arrow')+'</a></div>'+(topic?'<a class="editorial-link" href="#explore?topic='+encodeURIComponent(topic.id)+'"><span class="editorial-mark">'+esc(library.discovery.featuredMark)+'</span><span><strong>'+esc(topic.name)+'</strong><small>'+esc(topic.subtitle)+'</small></span>'+icon('arrow')+'</a>':'')+'</section></div>'+PuzzleView.entry(library)+'<section><div class="section-heading"><div><p class="eyebrow">诗里的风景</p><h2>你想走近哪一处？</h2></div><a class="text-btn" href="#explore">全部线索 '+icon('arrow')+'</a></div><div class="motifs">'+motifs.filter(c=>tagById(c.tag)).map(({tag:id,label:name,hint:note,icon:iconName})=>'<button class="motif" data-action="tag" data-id="'+id+'"><span class="motif-orb">'+icon(iconName)+'</span><span class="motif-name">'+esc(name)+'<span class="motif-note">'+esc(note)+'</span></span></button>').join('')+'</div></section>'+letterRoom()+'<section><div class="section-heading"><div><p class="eyebrow">一组文字，一次漫游</p><h2>走一条诗里的小径</h2></div></div><div class="topics">'+library.topics.map((t,i)=>'<a class="topic-card topic-'+i+'" href="#explore?topic='+encodeURIComponent(t.id)+'"><div class="topic-art">'+scene(t.scene,'topic'+i)+'</div><div class="topic-copy"><span class="topic-kicker">诗意小集</span><h3>'+esc(t.name)+'</h3><p>'+esc(t.subtitle)+'</p><span class="topic-arrow">'+icon('arrow')+'</span></div></a>').join('')+'</div></section><section><div class="section-heading"><h2>不妨，再读一篇</h2><a class="text-btn" href="#explore">全部作品 '+icon('arrow')+'</a></div><div class="work-grid home-recommendations">'+library.works.filter(w=>w.id!==currentHome).slice(0,3).map(tile).join('')+'</div></section>';
+    return '<h1 class="sr-only">山月 · 遇见文字里的天地</h1><div class="home-stage">'+readingCard()+'<section class="home-paths"><div class="desktop-intro"><p class="eyebrow">不赶路的时候</p><h2>留一点时间，<br>给眼前的诗。</h2><p>从一轮月、一阵风，走进心里的远方。</p></div><div class="discovery-entries"><a href="#explore" class="discovery-entry"><strong>按风景找</strong><span>月色、花事、山川</span>'+icon('arrow')+'</a><a href="#explore?view=feeling" class="discovery-entry"><strong>按心情找</strong><span>思念、闲适、旷达</span>'+icon('arrow')+'</a></div>'+(topic?'<a class="editorial-link" href="#explore?topic='+encodeURIComponent(topic.id)+'"><span class="editorial-mark">'+esc(library.discovery.featuredMark)+'</span><span><strong>'+esc(topic.name)+'</strong><small>'+esc(topic.subtitle)+'</small></span>'+icon('arrow')+'</a>':'')+'</section></div>'+ShanyueGarden.homeEntry()+'<section><div class="section-heading"><div><p class="eyebrow">诗里的风景</p><h2>你想走近哪一处？</h2></div><a class="text-btn" href="#explore">全部线索 '+icon('arrow')+'</a></div><div class="motifs">'+motifs.filter(c=>tagById(c.tag)).map(({tag:id,label:name,hint:note,icon:iconName})=>'<button class="motif" data-action="tag" data-id="'+id+'"><span class="motif-orb">'+icon(iconName)+'</span><span class="motif-name">'+esc(name)+'<span class="motif-note">'+esc(note)+'</span></span></button>').join('')+'</div></section>'+letterRoom()+'<section><div class="section-heading"><div><p class="eyebrow">一组文字，一次漫游</p><h2>走一条诗里的小径</h2></div></div><div class="topics">'+library.topics.map((t,i)=>'<a class="topic-card topic-'+i+'" href="#explore?topic='+encodeURIComponent(t.id)+'"><div class="topic-art">'+scene(t.scene,'topic'+i)+'</div><div class="topic-copy"><span class="topic-kicker">诗意小集</span><h3>'+esc(t.name)+'</h3><p>'+esc(t.subtitle)+'</p><span class="topic-arrow">'+icon('arrow')+'</span></div></a>').join('')+'</div></section><section><div class="section-heading"><h2>不妨，再读一篇</h2><a class="text-btn" href="#explore">全部作品 '+icon('arrow')+'</a></div><div class="work-grid home-recommendations">'+library.works.filter(w=>w.id!==currentHome).slice(0,3).map(tile).join('')+'</div></section>';
   }
   async function shuffleWork() {
     const version=++shuffleVersion,route=routeVersion,old=$('.reading-card'),scroll=window.scrollY;
@@ -292,16 +293,18 @@
     if(id)expanded.set(id,$$('.content-module[open]').map(d=>d.dataset.module));
   }
   function renderRoute(animate=true) {
-    clearTimeout(searchTimer);clearTimeout(shareTimer);Experience.clear();
+    clearTimeout(searchTimer);clearTimeout(shareTimer);Experience.clear();SceneView.cleanup();
     const hash=location.hash||'#home';rememberView();
     const [route,query='']=hash.slice(1).split('?'),params=new URLSearchParams(query);
-    if(['home','explore','saved','play'].includes(route))lastListing=hash;
+    if(['home','explore','saved','play'].includes(route)||route.startsWith('play/'))lastListing=hash;
     let html='',work=null;
     if(route==='explore'){
       explore={search:params.get('q')||'',tags:params.getAll('tag').filter(tagById),author:params.get('author')||'',form:params.get('form')||'',stage:params.get('stage')||'',topic:params.get('topic')||'',view:['feeling','places'].includes(params.get('view'))?params.get('view'):'landscape'};
       html=explorePage();
     }else if(route==='saved')html=savedPage();
-    else if(route==='play')html='<div id="puzzle-root">'+PuzzleView.markup(library,scene)+'</div>';
+    else if(route==='play')html=ShanyueGarden.markup(library,scene);
+    else if(route==='play/compose')html='<div class="game-breadcrumb"><a href="#play">← 返回游园</a></div><div id="puzzle-root">'+PuzzleView.markup(library,scene)+'</div>';
+    else if(route==='play/scenes')html='<div id="scene-root">'+SceneView.markup(library)+'</div>';
     else if(route.startsWith('work/')){
       work=workById(decodeURIComponent(route.slice(5)));
       if(work){state.lastWork=work.id;currentHome=work.id;persist();html=detail(work);}else html=emptySaved('这篇作品暂时不在小集中。','可以回到发现，看看其他作品。');
@@ -310,14 +313,15 @@
       if(!share||share.workId!==id){share=createShare(id);shareTool='';shareReturn=workById(id)?'#work/'+id:'#home';}
       html=share?sharePage():emptySaved('暂时找不到这篇作品。','回到发现，选一篇喜欢的文字吧。');
     }else html=home();
-    document.body.dataset.page=route.startsWith('card/')?'card':route.startsWith('work/')?'work':route;
+    document.body.dataset.page=route.startsWith('play/')?'play':route.startsWith('card/')?'card':route.startsWith('work/')?'work':route;
     document.body.dataset.longReading=String(!!work&&(work.form.includes('古文')||work.lines.length>8));
     $('#app').innerHTML='<div'+(animate?' class="fade-in"':'')+'>'+html+'</div>';
-    if(route==='play')PuzzleView.mount($('#puzzle-root'),library,scene,round=>{const w=workById(round.workId);if(w)openShare(w.id,null,null,{title:w.title,author:authorOf(w).name,dynasty:authorOf(w).dynasty,text:round.lines.join('\n')});});
+    if(route==='play/compose')PuzzleView.mount($('#puzzle-root'),library,scene,round=>{const w=workById(round.workId);if(w)openShare(w.id,null,null,{title:w.title,author:authorOf(w).name,dynasty:authorOf(w).dynasty,text:round.lines.join('\n')});});
+    if(route==='play/scenes')SceneView.mount($('#scene-root'),library,{toast,poster:result=>openModal('把这一刻的诗意带走','<img class="scene-poster" src="'+result.url+'" alt="'+esc(result.title+'诗景卡：'+result.quote)+'"><p class="help">手机可长按图片保存，也可以下载 PNG。</p><a class="btn primary scene-download" href="'+result.url+'" download="'+esc('山月-诗里寻景-'+result.title.replace(/[\\/:*?"<>|]/g,'')+'.png')+'">保存诗景卡</a>',true)});
     Experience.observe($('#app'));Experience.scene($('.hero-art')||$('.aside-art'));
-    const section=route.startsWith('work/')||route.startsWith('card/')?lastListing.slice(1).split('?')[0]:route;
+    const section=route.startsWith('work/')||route.startsWith('card/')?lastListing.slice(1).split('?')[0].split('/')[0]:route.split('/')[0];
     $$('[data-nav]').forEach(a=>{const active=a.dataset.nav===(['explore','saved','play'].includes(section)?section:'home');a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
-    document.title=work?work.title+' · 山月':route==='play'?'拾句成诗 · 山月':route.startsWith('card/')?'制作诗卡 · 山月':'山月 · 在字里行间，遇见天地';
+    document.title=work?work.title+' · 山月':route==='play'?'游园 · 山月':route==='play/compose'?'拾句成诗 · 山月':route==='play/scenes'?'诗里寻景 · 山月':route.startsWith('card/')?'制作诗卡 · 山月':'山月 · 在字里行间，遇见天地';
     if(route.startsWith('card/')&&share){renderShare();renderTemplatePreviews();}
     previousRoute=hash;const version=++routeVersion,wantsSearch=focusSearch;focusSearch=false;
     if(!dialog.open)window.scrollTo({top:wantsSearch?0:positions.get(hash)||0,behavior:'auto'});

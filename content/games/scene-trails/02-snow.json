@@ -1,0 +1,69 @@
+{
+  "id": "snow",
+  "name": "江边静一静",
+  "stamp": "天地留白",
+  "alt": "雪落在空阔的江面和远山上，水上只有一叶小舟，一位戴斗笠、披蓑衣的人坐着垂钓。",
+  "clues": [
+    {
+      "name": "看看江面",
+      "text": "雪山与江面之间，只留着一叶小舟。",
+      "x": 72,
+      "y": 80,
+      "tx": 59,
+      "ty": 75,
+      "target": "boat"
+    },
+    {
+      "name": "舟中是谁",
+      "text": "舟中人戴着斗笠、披着蓑衣，一根细细的钓线垂向水中。",
+      "x": 43,
+      "y": 55,
+      "tx": 55,
+      "ty": 63,
+      "target": "fisher"
+    }
+  ],
+  "answer": "jiangxue",
+  "options": [
+    {
+      "workId": "jiangxue",
+      "lines": [
+        2,
+        3
+      ],
+      "response": "孤舟、蓑笠、独钓与江雪，都在这幅留白里。",
+      "authorId": "liuzongyuan",
+      "expected": [
+        "孤舟蓑笠翁，",
+        "独钓寒江雪。"
+      ]
+    },
+    {
+      "workId": "jiangshangyuzhe",
+      "lines": [
+        2,
+        3
+      ],
+      "response": "同样是一叶舟。这两句把船放在起伏风浪中；眼前更醒目的是雪和静静垂下的钓线。",
+      "authorId": "fanzhongyan",
+      "expected": [
+        "君看一叶舟，",
+        "出没风波里。"
+      ]
+    },
+    {
+      "workId": "fengqiaoyepo",
+      "lines": [
+        0,
+        1
+      ],
+      "response": "也写水边的寒意。这两句还有月落、乌啼与渔火；这里是一片雪色和一个垂钓的人。",
+      "authorId": "zhangji",
+      "expected": [
+        "月落乌啼霜满天，",
+        "江枫渔火对愁眠。"
+      ]
+    }
+  ],
+  "reading": "“孤”写舟，“独”写人。大幅留白衬出很小的一人一舟，让人先感到寂静，也看见寒冷中仍然垂钓的身影。"
+}
