@@ -4,3 +4,5 @@
 @media(prefers-reduced-motion:reduce){.garden-card{transition:none}.garden-card:hover{transform:none}}
 @media(max-width:700px){.garden-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.garden-card,.garden-card:nth-child(2){border-radius:30px 8px 8px 8px}.garden-art{height:155px}.garden-copy{padding:17px 14px}.garden-copy h2{font-size:22px;letter-spacing:1px}.garden-copy .eyebrow{font-size:10px;letter-spacing:.2px}.garden-copy>p{font-size:12px;min-height:70px}.garden-pieces{gap:5px}.garden-pieces i{font-size:17px;padding:10px 5px;letter-spacing:2px}.garden-go{font-size:11px;gap:5px}.garden-go>span{font-size:17px}.garden-badge{top:13px;right:13px;font-size:10px}.garden-heading>p:last-child{max-width:290px}.garden-art>svg{height:100%;width:100%}}
 @media(max-width:360px){.garden-grid{gap:10px}.garden-copy{padding:15px 11px}.garden-copy h2{font-size:20px}.garden-copy .eyebrow{font-size:9px}.garden-art{height:135px}.garden-go{font-size:10px}}
+
+.game-breadcrumb{margin:0 0 18px;font-size:13px;color:var(--green)}.game-breadcrumb a{display:inline-flex;align-items:center;min-height:44px}

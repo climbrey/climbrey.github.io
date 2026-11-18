@@ -8,7 +8,7 @@
   const Personal = ShanyuePersonal;
   const Experience = ShanyueExperience;
   const PuzzleView = ShanyuePuzzleView;
-  const SceneView = ShanyueSceneView;
+  const SceneView = ShanyueMysteryView;
   let letters = [], openedLetter = null;
   const SEED = ShanyueLibrary.validateLibrary(JSON.parse($('#library-data').textContent));
   const seedFingerprints = Personal.fingerprints(SEED);
@@ -304,7 +304,7 @@
     }else if(route==='saved')html=savedPage();
     else if(route==='play')html=ShanyueGarden.markup(library,scene);
     else if(route==='play/compose')html='<div class="game-breadcrumb"><a href="#play">← 返回游园</a></div><div id="puzzle-root">'+PuzzleView.markup(library,scene)+'</div>';
-    else if(route==='play/scenes')html='<div id="scene-root">'+SceneView.markup(library)+'</div>';
+    else if(route==='play/scenes')html=SceneView.markup(library);
     else if(route.startsWith('work/')){
       work=workById(decodeURIComponent(route.slice(5)));
       if(work){state.lastWork=work.id;currentHome=work.id;persist();html=detail(work);}else html=emptySaved('这篇作品暂时不在小集中。','可以回到发现，看看其他作品。');
@@ -317,11 +317,11 @@
     document.body.dataset.longReading=String(!!work&&(work.form.includes('古文')||work.lines.length>8));
     $('#app').innerHTML='<div'+(animate?' class="fade-in"':'')+'>'+html+'</div>';
     if(route==='play/compose')PuzzleView.mount($('#puzzle-root'),library,scene,round=>{const w=workById(round.workId);if(w)openShare(w.id,null,null,{title:w.title,author:authorOf(w).name,dynasty:authorOf(w).dynasty,text:round.lines.join('\n')});});
-    if(route==='play/scenes')SceneView.mount($('#scene-root'),library,{toast,poster:result=>openModal('把这一刻的诗意带走','<img class="scene-poster" src="'+result.url+'" alt="'+esc(result.title+'诗景卡：'+result.quote)+'"><p class="help">手机可长按图片保存，也可以下载 PNG。</p><a class="btn primary scene-download" href="'+result.url+'" download="'+esc('山月-诗里寻景-'+result.title.replace(/[\\/:*?"<>|]/g,'')+'.png')+'">保存诗景卡</a>',true)});
+    if(route==='play/scenes')SceneView.mount($('#mystery-host'),library,{read:id=>{location.hash='#work/'+encodeURIComponent(id);}});
     Experience.observe($('#app'));Experience.scene($('.hero-art')||$('.aside-art'));
     const section=route.startsWith('work/')||route.startsWith('card/')?lastListing.slice(1).split('?')[0].split('/')[0]:route.split('/')[0];
     $$('[data-nav]').forEach(a=>{const active=a.dataset.nav===(['explore','saved','play'].includes(section)?section:'home');a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
-    document.title=work?work.title+' · 山月':route==='play'?'游园 · 山月':route==='play/compose'?'拾句成诗 · 山月':route==='play/scenes'?'诗里寻景 · 山月':route.startsWith('card/')?'制作诗卡 · 山月':'山月 · 在字里行间，遇见天地';
+    document.title=work?work.title+' · 山月':route==='play'?'游园 · 山月':route==='play/compose'?'拾句成诗 · 山月':route==='play/scenes'?'荷塘来信 · 山月':route.startsWith('card/')?'制作诗卡 · 山月':'山月 · 在字里行间，遇见天地';
     if(route.startsWith('card/')&&share){renderShare();renderTemplatePreviews();}
     previousRoute=hash;const version=++routeVersion,wantsSearch=focusSearch;focusSearch=false;
     if(!dialog.open)window.scrollTo({top:wantsSearch?0:positions.get(hash)||0,behavior:'auto'});
@@ -510,7 +510,7 @@
     openModal('作品标签 · '+w.title,'<div class="filter-options">'+library.tags.map(t=>'<label class="check" style="min-width:125px"><input type="checkbox" data-work-tag="'+esc(t.id)+'" '+(w.tags.includes(t.id)?'checked':'')+'>'+esc(t.name)+'</label>').join('')+'</div><button class="btn primary" data-action="save-work-tags" data-id="'+esc(id)+'" style="margin-top:20px">保存标签</button>',true);
   }
   function confirmAction(title,text,action,id) { openModal(title,'<p style="line-height:2;margin-bottom:23px">'+esc(text)+'</p><div class="row"><button class="btn primary" data-action="'+action+'" data-id="'+esc(id)+'">确认</button><button class="btn" data-action="close-modal">取消</button></div>',true); }
-  function exportJson(kind) { const payload={format:'shanyue',version:kind==='backup'?2:1,kind,library,...(kind==='backup'?{state,personal:personalContent,notices:contentNotices}:{}),exportedAt:new Date().toISOString()};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);downloadUrl(url,'山月-'+(kind==='backup'?'个人备份':'内容包')+'-'+localDate()+'.json');setTimeout(()=>URL.revokeObjectURL(url),20000);toast('导出文件已准备好。'); }
+  function exportJson(kind) { const payload={format:'shanyue',version:kind==='backup'?2:1,kind,library,...(kind==='backup'?{state,personal:personalContent,notices:contentNotices,games:{mystery:SceneView.snapshot()}}:{}),exportedAt:new Date().toISOString()};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});const url=URL.createObjectURL(blob);downloadUrl(url,'山月-'+(kind==='backup'?'个人备份':'内容包')+'-'+localDate()+'.json');setTimeout(()=>URL.revokeObjectURL(url),20000);toast('导出文件已准备好。'); }
   function exportHtml() {
     const copy=document.documentElement.cloneNode(true);
     copy.querySelectorAll('[data-hosted-only]').forEach(element=>element.remove());
@@ -540,8 +540,8 @@
         const merge=(a,b)=>Array.from(new Map(a.concat(b).map(x=>[x.id,x])).values());
         merged=validateLibrary({...library,discovery:incoming.discovery,authors:{...library.authors,...incoming.authors},works:merge(library.works,incoming.works),tags:merge(library.tags,incoming.tags),modules:merge(library.modules,incoming.modules),topics:merge(library.topics,incoming.topics)});
       }
-      pendingImport={library:merged,state:data.kind==='backup'?normalizeState(data.state):state,notices,kind:data.kind};
-      area.innerHTML='<div class="import-preview"><h4>'+esc(data.kind==='backup'?'恢复个人备份':'合并内容包')+'</h4><p>'+incoming.works.length+' 篇作品；新增 '+additions+' 篇，已有标识 '+(incoming.works.length-additions)+' 篇。</p><p>'+(data.kind==='backup'?'将恢复收藏、设置与个人修改；未修改的内置内容采用当前版本。':'同标识作品、分类及模块将采用导入内容，个人收藏保留。')+'</p><div class="row" style="margin-top:13px"><button class="btn primary small" data-action="apply-import">确认导入</button><button class="btn small" data-action="cancel-import">取消</button></div></div>';
+      pendingImport={library:merged,state:data.kind==='backup'?normalizeState(data.state):state,notices,kind:data.kind,games:data.kind==='backup'?data.games:null};
+      area.innerHTML='<div class="import-preview"><h4>'+esc(data.kind==='backup'?'恢复个人备份':'合并内容包')+'</h4><p>'+incoming.works.length+' 篇作品；新增 '+additions+' 篇，已有标识 '+(incoming.works.length-additions)+' 篇。</p><p>'+(data.kind==='backup'?'将恢复收藏、设置、个人修改与备份中的游戏进度；未修改的内置内容采用当前版本。':'同标识作品、分类及模块将采用导入内容，个人收藏保留。')+'</p><div class="row" style="margin-top:13px"><button class="btn primary small" data-action="apply-import">确认导入</button><button class="btn small" data-action="cancel-import">取消</button></div></div>';
     }catch(error){pendingImport=null;area.innerHTML='<p class="error" role="alert">'+esc(error.message)+'</p>';}
   }
   function about() {
@@ -648,7 +648,7 @@
         case 'export-content':exportJson('content');break;
         case 'export-html':exportHtml();break;
         case 'cancel-import':pendingImport=null;$('#import-preview').innerHTML='';$('#import-file').value='';break;
-        case 'apply-import':if(pendingImport){library=pendingImport.library;state=pendingImport.state;contentNotices=pendingImport.kind==='backup'?pendingImport.notices:contentNotices;storageBlocked=false;state.favorites=state.favorites.filter(id=>workById(id));currentHome=workById(state.lastWork)?state.lastWork:library.works[0].id;explore.tags=explore.tags.filter(tagById);persist(true);serifSize();closeModal();previousRoute='';renderRoute();toast('导入完成。');}break;
+        case 'apply-import':if(pendingImport){if(pendingImport.games?.mystery)SceneView.restore(pendingImport.games.mystery);library=pendingImport.library;state=pendingImport.state;contentNotices=pendingImport.kind==='backup'?pendingImport.notices:contentNotices;storageBlocked=false;state.favorites=state.favorites.filter(id=>workById(id));currentHome=workById(state.lastWork)?state.lastWork:library.works[0].id;explore.tags=explore.tags.filter(tagById);persist(true);serifSize();closeModal();previousRoute='';renderRoute();toast('导入完成。');}break;
       }
     }catch(error){toast('操作没有完成：'+error.message);console.error(error);}
   });
