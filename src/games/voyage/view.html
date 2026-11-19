@@ -1,0 +1,21 @@
+<section class="voyage">
+  <header class="topbar"><a href="#play" aria-label="返回游园">〈 游园</a><span>山月 <i> / </i> 荷塘来信</span><div><button id="sound" aria-pressed="false" aria-label="打开水声">水声</button><button id="pause" aria-pressed="false" aria-label="静止画面">静</button><button id="help" aria-label="玩法帮助">?</button></div></header>
+  <div class="stage-wrap">
+    <div class="scene" id="scene">
+      <div class="scene-title"><span>一叶小舟，两岸风景</span><h1>借水行舟</h1></div>
+      <div id="landscape"></div>
+      <div class="scene-controls" id="scene-controls"></div>
+      <div class="scene-caption"><span class="live-dot"></span><span id="scene-caption">水正轻轻流过，纸舟却停了下来。</span></div>
+    </div>
+    <aside class="dock">
+      <div class="chapter-label"><span id="chapter-label">一 · 水口</span><button id="journal" class="text-button">我的拾景 <span id="journal-count">0</span></button></div>
+      <h2 id="task-title" tabindex="-1"></h2>
+      <p id="task-description" class="task-description"></p>
+      <div id="controls"></div>
+      <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+      <div class="dock-footer"><button id="undo" class="text-button">↶ 撤回</button><button id="hint" class="text-button">借一点灵感</button><span>不赶路，也会遇见。</span></div>
+      <p id="storage-note" hidden>此浏览器暂时不能保存进度。可到设置导出个人备份。</p>
+    </aside>
+  </div>
+  <dialog id="voyage-dialog" aria-labelledby="dialog-title"><header><h2 id="dialog-title"></h2><button id="close" aria-label="关闭">×</button></header><div id="dialog-body"></div></dialog>
+</section>

@@ -1,0 +1,9 @@
+{
+  "id": "borrow-the-water",
+  "title": "借水行舟",
+  "subtitle": "荷塘来信 · 一叶小舟，两岸风景",
+  "routes": [
+    {"id": "bamboo", "name": "竹影水道", "invitation": "沿竹影，去看一只停下来的蜻蜓。", "work": "xiaochi", "author": "yangwanli", "lines": [2, 3], "expected": ["小荷才露尖尖角，", "早有蜻蜓立上头。"], "discovery": "小荷初见", "innerLeaf": -1, "hint": "缓水顺着左岸走；轻推水流，也能借向右的叶片绕过石头。"},
+    {"id": "lotus", "name": "荷叶浅湾", "invitation": "穿过荷叶，找一尾藏起来的鱼。", "work": "jiangnan", "author": "hanyuefu", "lines": [1, 2], "expected": ["莲叶何田田。", "鱼戏莲叶间。"], "discovery": "鱼戏莲间", "innerLeaf": 1, "hint": "缓水顺着右岸走；轻推水流，也能借向左的叶片绕过荷丛。"}
+  ]
+}

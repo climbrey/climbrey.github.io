@@ -1,4 +1,4 @@
-const RELEASE = '8a293ead30e08fce';
+const RELEASE = 'a8e809600eb80893';
 const SCOPE = self.registration.scope;
 const PREFIX = 'shanyue-' + new URL(SCOPE).pathname + '-';
 const CACHE = PREFIX + RELEASE;
